@@ -2,13 +2,6 @@ import os
 import sys
 from typing import Optional, Union, Dict
 
-def find_file(filename: str, search_path: Optional[str] = os.getcwd()) -> str | None:
-    for root, dirs, files in os.walk(search_path):
-        if filename in files:
-            return os.path.join(root, filename)
-        return None
-
-
 
 def configuration() -> Dict[str, str]:
     if len(sys.argv) == 1:

@@ -2,7 +2,7 @@ import random
 
 
 class MazeGenerator:
-    def __init__(self, maze):
+    def __init__(self, maze) -> None:
         self.maze_width: int = maze.width
         self.maze_height: int = maze.height
         self.maze_entry: tuple = maze.entry
