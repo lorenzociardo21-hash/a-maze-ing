@@ -1,20 +1,115 @@
 import random
 
 
+DIRECTIONS = {
+    "N": {"num": 1, "opposite": "S", "dx": 0, "dy": - 1},
+    "S": {"num": 4, "opposite": "N", "dx": 0, "dy": 1},
+    "E": {"num": 2, "opposite": "W", "dx": 1, "dy": 0},
+    "W": {"num": 8, "opposite": "E", "dx": - 1, "dy": 0},
+}
+
+
+PATTERN_42 = [
+    (0, 0), (0, 1), (0, 2), (1, 2), (2, 2), (2, 3), (2, 4), #4
+    (4, 0), (5, 0), (6, 0), (6, 1), (6, 2), (5, 2), (4, 2), (4, 3), (4, 4), (5, 4), (6, 4), #2
+]
+
+
 class MazeGenerator:
     def __init__(self, maze) -> None:
-        self.maze_width: int = maze.width
-        self.maze_height: int = maze.height
-        self.maze_entry: tuple = maze.entry
-        self.maze_exit: tuple = maze.exit
+        self.width: int = maze.width
+        self.height: int = maze.height
+        self.entry: tuple = maze.entry
+        self.exit: tuple = maze.exit
         self.perfect: bool = maze.perfect
-        self.visited_cells = []
 
-    def create_grid(self):
-        return [[15 for _ in range(self.maze_width)] for _ in range(self.maze_height)]
+    def create_grid(self) -> list[list[int]]:
+        return [[15 for _ in range(self.width)] for _ in range(self.height)]
+    
+    def pattern42(self) -> set[tuple[int, int]]:
+        center_x = self.width // 2 - 3
+        center_y = self.height // 2 - 2
+        return {(center_x + dx, center_y + dy) for dx, dy in PATTERN_42}
 
-    def generate_maze(self):
-        frontiera = []
-        grid = self.create_grid()
-        self.visited_cells.extend([(self.maze_entry[0], self.maze_entry[1]), (self.maze_exit[0], self.maze_exit[1])])
-        
+    def check_bounds(self, x: int, y: int):
+        return 0 <= x < self.width and 0 <= y < self.height
+
+    def remove_wall(self, grid: list[list[int]],
+                    x: int,
+                    y: int, dir: str) -> None:
+        neighbour_x = x + DIRECTIONS[dir]["dx"]
+        neighbour_y = y + DIRECTIONS[dir]["dy"]
+        opposite = DIRECTIONS[dir]["opposite"]
+
+        grid[y][x] &= ~DIRECTIONS[dir]["num"] #using the bitwise operators cause it's less prone to cause errors, the & is the "and" operator and the ~ is the not operator
+        grid[neighbour_y][neighbour_x] &= ~DIRECTIONS[opposite]["num"]
+
+    def square_3x3(self, grid: list[list[int]], nx: int, ny: int) -> bool:
+        for block_x in range(nx - 2, nx + 1):
+            for block_y in range(ny - 2, ny + 1):
+                square3x3 = True
+                for dx in range(3):
+                    for dy in range(3):
+                        cell_x, cell_y = block_x + dx, block_y + dy
+                        if not self.check_bounds(cell_x, cell_y) or not self.is_visited(grid, cell_x, cell_y):
+                            square3x3 = False
+                            break
+                    if not square3x3:
+                        break
+                if square3x3:
+                    return True
+        return False
+
+    def unvisited_neighbours(self, x: int, y: int, pattern_cells: set, visited: set) -> list[tuple[int, int, str]]:
+        neighbours = []
+        for direction, values in DIRECTIONS.items():
+            neighbour_x, neighbour_y = x + values["dx"], y + values["dy"]
+            if (self.check_bounds(neighbour_x, neighbour_y)
+                and (neighbour_x, neighbour_y) not in visited
+                and (neighbour_x, neighbour_y) not in pattern_cells):
+                neighbours.append((neighbour_x, neighbour_y, direction))
+        return neighbours
+
+    def get_remaining_walls(self, grid: list[list[int]], pattern_cells: set, percentage: float) -> list[tuple]:
+        walls = []
+        for row in range(self.height):
+            for column in range(self.width):
+                if (grid[row][column] & 2 and self.check_bounds(column + 1, row)
+                and (column + 1, row) not in pattern_cells):
+                    walls.append((column, row, "E"))
+                if (grid[row][column] & 4 and self.check_bounds(column, row + 1)
+                and (column, row + 1) not in pattern_cells):
+                    walls.append((column, row, "S"))
+        k = int(len(walls) * percentage)
+        return random.sample(walls, k)
+
+    def generate_maze(self, grid: list[list[int]]) -> list[list[int]]:
+        pattern_cells = self.pattern42()
+        visited = set()
+        visited.add(self.entry)
+        stack = [self.entry]
+
+        while stack:
+            x, y = stack[-1]
+            neighbours = self.unvisited_neighbours(x, y, grid, pattern_cells, visited)
+            neighbours = [
+                (nx, ny, direction) for nx, ny, direction in neighbours
+                if not self.square_3x3(grid, nx, ny)
+            ]
+
+            if neighbours:
+                nx, ny, d = random.choice(neighbours)
+                self.remove_wall(grid, x, y, d)
+                visited.add((nx, ny))
+                stack.append((nx, ny))
+            else:
+                stack.pop()
+        if not self.perfect:
+            chosen_ones = self.get_remaining_walls(grid, pattern_cells, 0.15)
+            while chosen_ones:
+                x, y, d = chosen_ones[-1]
+                if not self.square_3x3(grid, x, y):
+                    self.remove_wall(grid, x, y, d)
+                chosen_ones.pop()
+
+        return grid
