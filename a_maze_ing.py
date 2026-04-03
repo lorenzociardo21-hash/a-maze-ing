@@ -62,6 +62,7 @@ class mazeconfig:
             sys.exit(1)
         except ValueError:
             print("Errore: Hai scritto una parola dove volevo un numero!")
+            sys.exit(1)
         except Exception as e:
             print(f"Errore: {e}")
             sys.exit(1)
