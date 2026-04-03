@@ -46,7 +46,9 @@ class MazeGenerator:
         grid[y][x] &= ~DIRECTIONS[dir]["num"] #using the bitwise operators cause it's less prone to cause errors, the & is the "and" operator and the ~ is the not operator
         grid[neighbour_y][neighbour_x] &= ~DIRECTIONS[opposite]["num"]
 
-    def square_3x3(self, grid: list[list[int]], nx: int, ny: int, visited: set) -> bool:
+    def square_3x3(self, grid: list[list[int]], nx: int, ny: int, visited: set=None) -> bool:
+        if not visited:
+            visited={}
         '''Guarda se nei dinteorni della cella si forma un quadrato 3x3, controlla tutta la zona usando una flag square3x3'''
         for block_x in range(nx - 2, nx + 1):
             for block_y in range(ny - 2, ny + 1):
@@ -81,12 +83,13 @@ class MazeGenerator:
         walls = []
         for row in range(self.height):
             for column in range(self.width):
-                if (grid[row][column] & 2 and self.check_bounds(column + 1, row)
-                and (column + 1, row) not in pattern_cells):
-                    walls.append((column, row, "E"))
-                if (grid[row][column] & 4 and self.check_bounds(column, row + 1)
-                and (column, row + 1) not in pattern_cells):
-                    walls.append((column, row, "S"))
+                if (column, row) not in pattern_cells:
+                    if (grid[row][column] & 2 and self.check_bounds(column + 1, row)
+                    and (column + 1, row) not in pattern_cells):
+                        walls.append((column, row, "E"))
+                    if (grid[row][column] & 4 and self.check_bounds(column, row + 1)
+                    and (column, row + 1) not in pattern_cells):
+                        walls.append((column, row, "S"))
         k = int(len(walls) * percentage)
         return random.sample(walls, k)
 
@@ -100,7 +103,7 @@ class MazeGenerator:
 
         while stack:
             x, y = stack[-1]
-            neighbours = self.unvisited_neighbours(x, y, grid, pattern_cells, visited)
+            neighbours = self.unvisited_neighbours(x, y, pattern_cells, visited)
             neighbours = [
                 (nx, ny, direction) for nx, ny, direction in neighbours
                 if not self.square_3x3(grid, nx, ny, visited)
