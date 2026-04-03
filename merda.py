@@ -207,8 +207,8 @@ class MazeGenerator:
 
 def crea_pezzi_cella(valore_cella):
     RESET = "\033[0m"
-    MURO = "\033[94m" + "█" + RESET    
-    VUOTO = "\033[97m" + "█" + RESET
+    MURO = "\033[99m" + "█" + RESET    
+    VUOTO = "\033[92m" + "█" + RESET
     sopra = MURO
     mezzo = ""
     sotto = MURO
@@ -222,7 +222,7 @@ def crea_pezzi_cella(valore_cella):
         mezzo += MURO
     else:
         mezzo += VUOTO
-    mezzo += VUOTO       # Il centro sara sempre vuoto? che cazzo ne so?
+    mezzo += VUOTO     # Il centro sara sempre vuoto? che cazzo ne so?
     if valore_cella & 2: # Muro a destra
         mezzo += MURO
     else:
@@ -251,7 +251,6 @@ def disegna_maze(griglia):
 def main():
     settings = mazeconfig(config("config_prova.txt"))
     maze = MazeGenerator(settings)
-    disegna_maze(maze.generate_maze())
-
+    disegna_maze([[15]])
 
 main()

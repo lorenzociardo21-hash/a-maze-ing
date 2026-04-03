@@ -9,4 +9,4 @@ EXIT=20, 15
 #Output filename
 OUTPUT_FILE=maze.txt
 #Is the name perfect?
-PERFECT=False
+PERFECT=True
