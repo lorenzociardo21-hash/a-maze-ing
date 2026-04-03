@@ -86,7 +86,7 @@ PATTERN_42 = [
 
 
 class MazeGenerator:
-    def __init__(self, maze: mazeconfig) -> None:
+    def __init__(self, maze) -> None:
         self.width: int = maze.width
         self.height: int = maze.height
         self.entry: tuple = maze.entry
@@ -107,18 +107,18 @@ class MazeGenerator:
 
     def remove_wall(self, grid: list[list[int]],
                     x: int,
-                    y: int, dir: str) -> None:
+                    y: int, direction: str) -> None:
         '''rimuove i muri rifacendosi al dizionario, dove e' presente la direzione, l'opposto e il numero con cui confrontare'''
-        neighbour_x = x + DIRECTIONS[dir]["dx"]
-        neighbour_y = y + DIRECTIONS[dir]["dy"]
-        opposite = DIRECTIONS[dir]["opposite"]
+        neighbour_x = x + DIRECTIONS[direction]["dx"]
+        neighbour_y = y + DIRECTIONS[direction]["dy"]
+        opposite = DIRECTIONS[direction]["opposite"]
 
-        grid[y][x] &= ~DIRECTIONS[dir]["num"] #using the bitwise operators cause it's less prone to cause errors, the & is the "and" operator and the ~ is the not operator
+        grid[y][x] &= ~DIRECTIONS[direction]["num"] #using the bitwise operators cause it's less prone to cause errors, the & is the "and" operator and the ~ is the not operator
         grid[neighbour_y][neighbour_x] &= ~DIRECTIONS[opposite]["num"]
 
     def square_3x3(self, grid: list[list[int]], nx: int, ny: int, visited: set=None) -> bool:
-        if not visited:
-            visited={}
+        if visited is None:
+            visited = set()
         '''Guarda se nei dinteorni della cella si forma un quadrato 3x3, controlla tutta la zona usando una flag square3x3'''
         for block_x in range(nx - 2, nx + 1):
             for block_y in range(ny - 2, ny + 1):
@@ -126,7 +126,7 @@ class MazeGenerator:
                 for dx in range(3):
                     for dy in range(3):
                         cell_x, cell_y = block_x + dx, block_y + dy
-                        if not self.check_bounds(cell_x, cell_y) or (cell_x, cell_y) not in visited:
+                        if (not self.check_bounds(cell_x, cell_y)) or (grid[cell_y][cell_x] == 15 and (cell_x, cell_y) not in visited):
                             square3x3 = False
                             break
                     if not square3x3:
@@ -147,6 +147,9 @@ class MazeGenerator:
                 neighbours.append((neighbour_x, neighbour_y, direction))
         return neighbours
 
+    def can_show_pattern(self) -> bool:
+        return self.width >= 10 and self.height >= 7
+
     def get_remaining_walls(self, grid: list[list[int]], pattern_cells: set, percentage: float = 0.15) -> list[tuple]:
         '''viene usata per il non perfect maze, rende una lista celle, che hanno dei muri, randomica e secondo una percentuale k,
         guarda solo se la cella ha muri ad est o sud, perche si muove da sinistra a destra e dall'alto verso il basso. Oltre ai classici controlli dei limiti e delle celle 42'''
@@ -160,13 +163,20 @@ class MazeGenerator:
                     if (grid[row][column] & 4 and self.check_bounds(column, row + 1)
                     and (column, row + 1) not in pattern_cells):
                         walls.append((column, row, "S"))
+        if not 0 <= percentage <= 1:
+            raise ValueError("Percentage must be between 0 and 1.")
         k = int(len(walls) * percentage)
         return random.sample(walls, k)
 
-    def generate_maze(self, grid: list[list[int]]) -> list[list[int]]:
+    def generate_maze(self, seed: int = None) -> list[list[int]]:
         '''genera il maze, sia con perfect che non, utilizza DFS, avendo una lista di visitati formata da tuple di coordinate
         e poi ha uno variabile stack dalla quale toglie la cella solo se non ha celle vicine, quindi non visitate, fuori dai limiti e celle del pattern'''
-        pattern_cells = self.pattern42()
+
+        random.seed(seed)
+        grid = self.create_grid()
+        pattern_cells = set()
+        if self.can_show_pattern():
+            pattern_cells = self.pattern42()
         visited = set()
         visited.add(self.entry)
         stack = [self.entry]
@@ -190,8 +200,7 @@ class MazeGenerator:
             chosen_ones = self.get_remaining_walls(grid, pattern_cells, 0.15)
             while chosen_ones:
                 x, y, d = chosen_ones[-1]
-                if not self.square_3x3(grid, x, y):
-                    self.remove_wall(grid, x, y, d)
+                self.remove_wall(grid, x, y, d)
                 chosen_ones.pop()
 
         return grid
@@ -242,7 +251,7 @@ def disegna_maze(griglia):
 def main():
     settings = mazeconfig(config("config_prova.txt"))
     maze = MazeGenerator(settings)
-    disegna_maze(maze.generate_maze(maze.create_grid()))
+    disegna_maze(maze.generate_maze())
 
 
 main()
