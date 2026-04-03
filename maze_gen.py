@@ -130,8 +130,7 @@ class MazeGenerator:
             chosen_ones = self.get_remaining_walls(grid, pattern_cells, 0.15)
             while chosen_ones:
                 x, y, d = chosen_ones[-1]
-                if not self.square_3x3(grid, x, y):
-                    self.remove_wall(grid, x, y, d)
+                self.remove_wall(grid, x, y, d)
                 chosen_ones.pop()
 
         return grid
