@@ -15,7 +15,6 @@ def config(namefile: str) -> dict[str, str]:
                     parti = riga_pulita.split('=', 1)
                     chiave = parti[0].strip()
                     valore = parti[1].strip()
-                    
                     dati_estratti[chiave] = valore
                     
     except FileNotFoundError:
@@ -55,6 +54,9 @@ class mazeconfig:
                 sys.exit(1)
             if self.entry == self.exit:
                 print("Errore: Entrata e uscita non possono essere nello stesso posto!")
+            if self.width <= 0 or self.height <= 0:
+                print("Errore: Larghezza e altezza devono essere numeri positivi!")
+                sys.exit(1)     
         except KeyError as e:
             print(f"Errore: Manca la chiave obbligatoria {e}")
             sys.exit(1)
