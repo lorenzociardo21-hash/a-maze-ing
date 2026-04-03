@@ -46,7 +46,7 @@ class MazeGenerator:
         grid[y][x] &= ~DIRECTIONS[dir]["num"] #using the bitwise operators cause it's less prone to cause errors, the & is the "and" operator and the ~ is the not operator
         grid[neighbour_y][neighbour_x] &= ~DIRECTIONS[opposite]["num"]
 
-    def square_3x3(self, grid: list[list[int]], nx: int, ny: int) -> bool:
+    def square_3x3(self, grid: list[list[int]], nx: int, ny: int, visited: set) -> bool:
         '''Guarda se nei dinteorni della cella si forma un quadrato 3x3, controlla tutta la zona usando una flag square3x3'''
         for block_x in range(nx - 2, nx + 1):
             for block_y in range(ny - 2, ny + 1):
@@ -54,7 +54,7 @@ class MazeGenerator:
                 for dx in range(3):
                     for dy in range(3):
                         cell_x, cell_y = block_x + dx, block_y + dy
-                        if not self.check_bounds(cell_x, cell_y) or not self.is_visited(grid, cell_x, cell_y):
+                        if not self.check_bounds(cell_x, cell_y) or (cell_x, cell_y) not in visited:
                             square3x3 = False
                             break
                     if not square3x3:
@@ -103,7 +103,7 @@ class MazeGenerator:
             neighbours = self.unvisited_neighbours(x, y, grid, pattern_cells, visited)
             neighbours = [
                 (nx, ny, direction) for nx, ny, direction in neighbours
-                if not self.square_3x3(grid, nx, ny)
+                if not self.square_3x3(grid, nx, ny, visited)
             ]
 
             if neighbours:
