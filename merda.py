@@ -48,8 +48,8 @@ class mazeconfig:
                self.entry[1] < 0 or self.entry[1] >= self.height:
                 print("Errore: L'entrata è fuori dal labirinto!")
                 sys.exit(1)
-            if self.exit[0] < 0 or self.exit[0] >= self.width or \
-               self.exit[1] < 0 or self.exit[1] >= self.height:
+            if self.exit[0] < 0 or self.exit[0] > self.width or \
+               self.exit[1] < 0 or self.exit[1] > self.height:
                 print("Errore: L'uscita è fuori dal labirinto!")
                 sys.exit(1)
             if self.entry == self.exit:
@@ -153,12 +153,13 @@ class MazeGenerator:
         walls = []
         for row in range(self.height):
             for column in range(self.width):
-                if (grid[row][column] & 2 and self.check_bounds(column + 1, row)
-                and (column + 1, row) not in pattern_cells):
-                    walls.append((column, row, "E"))
-                if (grid[row][column] & 4 and self.check_bounds(column, row + 1)
-                and (column, row + 1) not in pattern_cells):
-                    walls.append((column, row, "S"))
+                if (column, row) not in pattern_cells:
+                    if (grid[row][column] & 2 and self.check_bounds(column + 1, row)
+                    and (column + 1, row) not in pattern_cells):
+                        walls.append((column, row, "E"))
+                    if (grid[row][column] & 4 and self.check_bounds(column, row + 1)
+                    and (column, row + 1) not in pattern_cells):
+                        walls.append((column, row, "S"))
         k = int(len(walls) * percentage)
         return random.sample(walls, k)
 
@@ -197,8 +198,8 @@ class MazeGenerator:
 
 def crea_pezzi_cella(valore_cella):
     RESET = "\033[0m"
-    MURO = "\033[91m" + "█" + RESET    
-    VUOTO = "\033[92m" + "█" + RESET
+    MURO = "\033[94m" + "█" + RESET    
+    VUOTO = "\033[97m" + "█" + RESET
     sopra = MURO
     mezzo = ""
     sotto = MURO
