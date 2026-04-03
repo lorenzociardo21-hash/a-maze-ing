@@ -24,6 +24,7 @@ class MazeGenerator:
         self.perfect: bool = maze.perfect
 
     def create_grid(self) -> list[list[int]]:
+        '''ritorna una griglia piena di 15, quindi tutte mura'''
         return [[15 for _ in range(self.width)] for _ in range(self.height)]
     
     def pattern42(self) -> set[tuple[int, int]]:
@@ -37,6 +38,7 @@ class MazeGenerator:
     def remove_wall(self, grid: list[list[int]],
                     x: int,
                     y: int, dir: str) -> None:
+        '''rimuove i muri rifacendosi al dizionario, dove e' presente la direzione, l'opposto e il numero con cui confrontare'''
         neighbour_x = x + DIRECTIONS[dir]["dx"]
         neighbour_y = y + DIRECTIONS[dir]["dy"]
         opposite = DIRECTIONS[dir]["opposite"]
@@ -45,6 +47,7 @@ class MazeGenerator:
         grid[neighbour_y][neighbour_x] &= ~DIRECTIONS[opposite]["num"]
 
     def square_3x3(self, grid: list[list[int]], nx: int, ny: int) -> bool:
+        '''Guarda se nei dinteorni della cella si forma un quadrato 3x3, controlla tutta la zona usando una flag square3x3'''
         for block_x in range(nx - 2, nx + 1):
             for block_y in range(ny - 2, ny + 1):
                 square3x3 = True
@@ -61,6 +64,8 @@ class MazeGenerator:
         return False
 
     def unvisited_neighbours(self, x: int, y: int, pattern_cells: set, visited: set) -> list[tuple[int, int, str]]:
+        '''Guarda le celle nei dintorni della cella corrente paasatagli e rende una lista di esse,
+        le quali non sono gia state visitate o non sono nel pattern42'''
         neighbours = []
         for direction, values in DIRECTIONS.items():
             neighbour_x, neighbour_y = x + values["dx"], y + values["dy"]
@@ -70,7 +75,9 @@ class MazeGenerator:
                 neighbours.append((neighbour_x, neighbour_y, direction))
         return neighbours
 
-    def get_remaining_walls(self, grid: list[list[int]], pattern_cells: set, percentage: float) -> list[tuple]:
+    def get_remaining_walls(self, grid: list[list[int]], pattern_cells: set, percentage: float = 0.15) -> list[tuple]:
+        '''viene usata per il non perfect maze, rende una lista celle, che hanno dei muri, randomica e secondo una percentuale k,
+        guarda solo se la cella ha muri ad est o sud, perche si muove da sinistra a destra e dall'alto verso il basso. Oltre ai classici controlli dei limiti e delle celle 42'''
         walls = []
         for row in range(self.height):
             for column in range(self.width):
@@ -84,6 +91,8 @@ class MazeGenerator:
         return random.sample(walls, k)
 
     def generate_maze(self, grid: list[list[int]]) -> list[list[int]]:
+        '''genera il maze, sia con perfect che non, utilizza DFS, avendo una lista di visitati formata da tuple di coordinate
+        e poi ha uno variabile stack dalla quale toglie la cella solo se non ha celle vicine, quindi non visitate, fuori dai limiti e celle del pattern'''
         pattern_cells = self.pattern42()
         visited = set()
         visited.add(self.entry)
