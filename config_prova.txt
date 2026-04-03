@@ -5,8 +5,8 @@ HEIGHT=15
 #Entry coordinates (x, y)
 ENTRY=0, 0
 #Exit coordinates (x, y)
-EXIT=19, 14
+EXIT=1, 2
 #Output filename
 OUTPUT_FILE=maze.txt
 #Is the name perfect?
-PERFECT=True
+PERFECT=False

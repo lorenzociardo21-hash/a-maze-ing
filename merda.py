@@ -13,7 +13,7 @@ def config(namefile: str) -> dict[str, str]:
                     continue
                 if '=' in riga_pulita:
                     parti = riga_pulita.split('=', 1)
-                    chiave = parti[0].strip()
+                    chiave = parti[0].strip().upper()
                     valore = parti[1].strip()
                     dati_estratti[chiave] = valore
                     
@@ -116,7 +116,9 @@ class MazeGenerator:
         grid[y][x] &= ~DIRECTIONS[dir]["num"] #using the bitwise operators cause it's less prone to cause errors, the & is the "and" operator and the ~ is the not operator
         grid[neighbour_y][neighbour_x] &= ~DIRECTIONS[opposite]["num"]
 
-    def square_3x3(self, grid: list[list[int]], nx: int, ny: int, visited: set) -> bool:
+    def square_3x3(self, grid: list[list[int]], nx: int, ny: int, visited: set=None) -> bool:
+        if not visited:
+            visited={}
         '''Guarda se nei dinteorni della cella si forma un quadrato 3x3, controlla tutta la zona usando una flag square3x3'''
         for block_x in range(nx - 2, nx + 1):
             for block_y in range(ny - 2, ny + 1):
@@ -193,10 +195,53 @@ class MazeGenerator:
 
         return grid
 
+def crea_pezzi_cella(valore_cella):
+    RESET = "\033[0m"
+    MURO = "\033[91m" + "█" + RESET    
+    VUOTO = "\033[92m" + "█" + RESET
+    sopra = MURO
+    mezzo = ""
+    sotto = MURO
+    if valore_cella & 1: # il sopra
+        sopra += MURO   # Chiudiamo il soffitto
+    else:
+        sopra += VUOTO  # Lasciamo un buco
+    sopra += MURO       # Chiudiamo l'angolo destro
+    # destra e sinistra  8 e 2
+    if valore_cella & 8: # Muro a sinistra
+        mezzo += MURO
+    else:
+        mezzo += VUOTO
+    mezzo += VUOTO       # Il centro sara sempre vuoto? che cazzo ne so?
+    if valore_cella & 2: # Muro a destra
+        mezzo += MURO
+    else:
+        mezzo += VUOTO
+    # il sotto(4)
+    if valore_cella & 4:
+        sotto += MURO
+    else:
+        sotto += VUOTO
+    sotto += MURO
+    return sopra, mezzo, sotto
+def disegna_maze(griglia):
+    for riga_numeri in griglia:
+        linea_sopra = ""
+        linea_mezzo = ""
+        linea_sotto = ""
+        for valore in riga_numeri:
+            p_sopra, p_mezzo, p_sotto = crea_pezzi_cella(valore)
+            linea_sopra += p_sopra
+            linea_mezzo += p_mezzo
+            linea_sotto += p_sotto
+        print(linea_sopra)
+        print(linea_mezzo)
+        print(linea_sotto)
 
 def main():
     settings = mazeconfig(config("config_prova.txt"))
     maze = MazeGenerator(settings)
-    print(maze.generate_maze(maze.create_grid()))
+    disegna_maze(maze.generate_maze(maze.create_grid()))
+
 
 main()
