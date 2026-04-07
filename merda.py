@@ -207,8 +207,8 @@ class MazeGenerator:
 
 def crea_pezzi_cella(valore_cella):
     RESET = "\033[0m"
-    MURO = "\033[99m" + "█" + RESET    
-    VUOTO = "\033[92m" + "█" + RESET
+    MURO = "\033[96m" + "█" + RESET    
+    VUOTO = "\033[98m" + "█" + RESET
     sopra = MURO
     mezzo = ""
     sotto = MURO
@@ -251,6 +251,7 @@ def disegna_maze(griglia):
 def main():
     settings = mazeconfig(config("config_prova.txt"))
     maze = MazeGenerator(settings)
-    disegna_maze([[15]])
+    for _ in range(15):
+        disegna_maze(maze.generate_maze())
 
 main()
