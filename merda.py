@@ -206,7 +206,7 @@ class MazeGenerator:
         return grid
 
 
-def get_open_neighbours(grid: list[list[int]], x: int, y: int, visited: set) -> list[tuple[int, int, str]]:
+def get_neighbours(grid: list[list[int]], x: int, y: int, visited: set) -> list[tuple[int, int, str]]:
     neighbours = []
     for direction, values in DIRECTIONS.items():
         if not grid[y][x] & values["num"]:
@@ -223,7 +223,7 @@ def maze_res(maze: MazeGenerator, grid: list[list[int]]) -> list[tuple[int, int,
     visited.add((current_x, current_y))
 
     while (current_x, current_y) != maze.exit:
-        neighbours = get_open_neighbours(grid, current_x, current_y, visited)
+        neighbours = get_neighbours(grid, current_x, current_y, visited)
 
         if neighbours:
             nx, ny, direction = neighbours[0]
@@ -239,8 +239,8 @@ def maze_res(maze: MazeGenerator, grid: list[list[int]]) -> list[tuple[int, int,
 
 def crea_pezzi_cella(valore_cella):
     RESET = "\033[0m"
-    MURO = "\033[96m" + "█" + RESET    
-    VUOTO = "\033[98m" + "█" + RESET
+    MURO = "\033[95m" + "█" + RESET    
+    VUOTO = "\033[97m" + "█" + RESET
     sopra = MURO
     mezzo = ""
     sotto = MURO
@@ -283,7 +283,7 @@ def disegna_maze(griglia):
 def main():
     settings = mazeconfig(config("config_prova.txt"))
     maze = MazeGenerator(settings)
-    for _ in range(15):
-        disegna_maze(maze.generate_maze())
+
+    disegna_maze(maze.generate_maze())
 
 main()
