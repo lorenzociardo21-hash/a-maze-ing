@@ -311,7 +311,7 @@ def disegna_maze(griglia: list[list[int]], settings, percorso, risolvi) -> None:
         print(linea_mezzo)
         print(linea_sotto)
 
-def main():
+def main() :
     settings = mazeconfig(config("config_prova.txt"))
     maze = MazeGenerator(settings)
     griglia = maze.generate_maze()
