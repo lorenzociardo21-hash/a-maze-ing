@@ -237,10 +237,13 @@ def maze_res(maze: MazeGenerator, grid: list[list[int]]) -> list[tuple[int, int,
 
     return stack
 
-def crea_pezzi_cella(valore_cella):
+def crea_pezzi_cella(valore_cella, x, y, settings):
     RESET = "\033[0m"
     MURO = "\033[95m" + "█" + RESET    
-    VUOTO = "\033[97m" + "█" + RESET
+    VUOTO = "\033[96m" + "█" + RESET
+    ENTRY = "\033[92m" + "E" + RESET
+    EXIT = "\033[94m" + "X" + RESET
+    QUARANTADUE = "\033[95m" + "█" + RESET 
     sopra = MURO
     mezzo = ""
     sotto = MURO
@@ -254,7 +257,17 @@ def crea_pezzi_cella(valore_cella):
         mezzo += MURO
     else:
         mezzo += VUOTO
-    mezzo += VUOTO     # Il centro sara sempre vuoto? che cazzo ne so?
+    
+    # Controllo per Entry, Exit e 42
+    if (x, y) == settings.entry:
+        mezzo += ENTRY
+    elif (x, y) == settings.exit:
+        mezzo += EXIT
+    elif valore_cella == 15: # Cella chiusa per il pattern 42 [cite: 140, 147]
+        mezzo += QUARANTADUE
+    else:
+        mezzo += VUOTO 
+        
     if valore_cella & 2: # Muro a destra
         mezzo += MURO
     else:
@@ -266,13 +279,14 @@ def crea_pezzi_cella(valore_cella):
         sotto += VUOTO
     sotto += MURO
     return sopra, mezzo, sotto
-def disegna_maze(griglia):
-    for riga_numeri in griglia:
+
+def disegna_maze(griglia, settings):
+    for y, riga_numeri in enumerate(griglia):
         linea_sopra = ""
         linea_mezzo = ""
         linea_sotto = ""
-        for valore in riga_numeri:
-            p_sopra, p_mezzo, p_sotto = crea_pezzi_cella(valore)
+        for x, valore in enumerate(riga_numeri):
+            p_sopra, p_mezzo, p_sotto = crea_pezzi_cella(valore, x, y, settings)
             linea_sopra += p_sopra
             linea_mezzo += p_mezzo
             linea_sotto += p_sotto
