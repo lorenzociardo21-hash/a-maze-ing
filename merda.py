@@ -237,13 +237,14 @@ def maze_res(maze: MazeGenerator, grid: list[list[int]]) -> list[tuple[int, int,
 
     return stack
 
-def crea_pezzi_cella(valore_cella: int, x: int, y: int, settings) -> tuple[str, str, str]:
+def crea_pezzi_cella(valore_cella: int, x: int, y: int, settings, percorso_coords: list[tuple[int, int]], risolvi: bool) -> tuple[str, str, str]:
     RESET = "\033[0m"
     MURO = "\033[95m" + "█" + RESET    
     VUOTO = "\033[96m" + "█" + RESET
     ENTRY = "\033[92m" + "█" + RESET
     EXIT = "\033[91m" + "█" + RESET
-    QUARANTADUE = "\033[99m" + "█" + RESET 
+    QUARANTADUE = "\033[99m" + "█" + RESET
+    PATH_COLOR = "\033[94m" + "█" + RESET
     if valore_cella == 15:
         MURO = QUARANTADUE
         VUOTO = QUARANTADUE
@@ -269,6 +270,8 @@ def crea_pezzi_cella(valore_cella: int, x: int, y: int, settings) -> tuple[str, 
         mezzo += EXIT
     elif valore_cella == 15: # Cella chiusa per il pattern 42
         mezzo += QUARANTADUE
+    elif (x, y) in percorso_coords and risolvi:
+        mezzo = PATH_COLOR
     else:
         mezzo += VUOTO 
         
@@ -284,13 +287,14 @@ def crea_pezzi_cella(valore_cella: int, x: int, y: int, settings) -> tuple[str, 
     sotto += MURO
     return sopra, mezzo, sotto
 
-def disegna_maze(griglia: list[list[int]], settings) -> None:
+def disegna_maze(griglia: list[list[int]], settings, percorso, risolvi) -> None:
+    percorso_coords = [(cella[0], cella[1]) for cella in percorso]
     for y, riga_numeri in enumerate(griglia):
         linea_sopra = ""
         linea_mezzo = ""
         linea_sotto = ""
         for x, valore in enumerate(riga_numeri):
-            p_sopra, p_mezzo, p_sotto = crea_pezzi_cella(valore, x, y, settings)
+            p_sopra, p_mezzo, p_sotto = crea_pezzi_cella(valore, x, y, settings, percorso_coords, risolvi)
             linea_sopra += p_sopra
             linea_mezzo += p_mezzo
             linea_sotto += p_sotto
@@ -301,7 +305,10 @@ def disegna_maze(griglia: list[list[int]], settings) -> None:
 def main():
     settings = mazeconfig(config("config_prova.txt"))
     maze = MazeGenerator(settings)
-
-    disegna_maze(maze.generate_maze(), settings)
+    griglia = maze.generate_maze()
+    print("--- LABIRINTO GENERATO ---")
+    soluzione = maze_res(maze, griglia)
+    disegna_maze(griglia, settings, soluzione, False)
+    disegna_maze(griglia, settings, soluzione, True)
 
 main()
