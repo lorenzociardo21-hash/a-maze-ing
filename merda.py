@@ -254,12 +254,16 @@ def crea_pezzi_cella(valore_cella: int, x: int, y: int, settings, percorso_coord
     sotto = MURO
     if valore_cella & 1: # il sopra
         sopra += MURO   # Chiudiamo il soffitto
+    elif (x, y - 1) in percorso_coords and risolvi and (x, y) in percorso_coords:
+        sopra += PATH_COLOR
     else:
         sopra += VUOTO  # Lasciamo un buco
     sopra += MURO       # Chiudiamo l'angolo destro
     # destra e sinistra  8 e 2
     if valore_cella & 8: # Muro a sinistra
         mezzo += MURO
+    elif (x - 1, y) in percorso_coords and risolvi and (x, y) in percorso_coords:
+        mezzo += PATH_COLOR
     else:
         mezzo += VUOTO
     
@@ -277,11 +281,15 @@ def crea_pezzi_cella(valore_cella: int, x: int, y: int, settings, percorso_coord
         
     if valore_cella & 2: # Muro a destra
         mezzo += MURO
+    elif (x + 1, y) in percorso_coords and risolvi and (x, y) in percorso_coords:
+        mezzo += PATH_COLOR
     else:
         mezzo += VUOTO
     # il sotto(4)
     if valore_cella & 4:
         sotto += MURO
+    elif (x, y + 1) in percorso_coords and risolvi and (x, y) in percorso_coords:
+        sotto += PATH_COLOR
     else:
         sotto += VUOTO
     sotto += MURO
@@ -289,7 +297,6 @@ def crea_pezzi_cella(valore_cella: int, x: int, y: int, settings, percorso_coord
 
 def disegna_maze(griglia: list[list[int]], settings, percorso, risolvi) -> None:
     percorso_coords = [(cella[0], cella[1]) for cella in percorso]
-    print(percorso_coords)
     for y, riga_numeri in enumerate(griglia):
         linea_sopra = ""
         linea_mezzo = ""
