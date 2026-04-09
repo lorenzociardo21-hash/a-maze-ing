@@ -237,7 +237,7 @@ def maze_res(maze: MazeGenerator, grid: list[list[int]]) -> list[tuple[int, int,
 
     return stack
 
-def crea_pezzi_cella(valore_cella, x, y, settings):
+def crea_pezzi_cella(valore_cella: int, x: int, y: int, settings) -> tuple[str, str, str]:
     RESET = "\033[0m"
     MURO = "\033[95m" + "█" + RESET    
     VUOTO = "\033[96m" + "█" + RESET
@@ -247,12 +247,7 @@ def crea_pezzi_cella(valore_cella, x, y, settings):
     if valore_cella == 15:
         MURO = QUARANTADUE
         VUOTO = QUARANTADUE
-    if (x, y) == settings.entry:
-        MURO = ENTRY
-        VUOTO = ENTRY
-    if (x, y) == settings.exit:
-        MURO = EXIT
-        VUOTO = EXIT
+
     sopra = MURO
     mezzo = ""
     sotto = MURO
@@ -272,7 +267,7 @@ def crea_pezzi_cella(valore_cella, x, y, settings):
         mezzo += ENTRY
     elif (x, y) == settings.exit:
         mezzo += EXIT
-    elif valore_cella == 15: # Cella chiusa per il pattern 42 [cite: 140, 147]
+    elif valore_cella == 15: # Cella chiusa per il pattern 42
         mezzo += QUARANTADUE
     else:
         mezzo += VUOTO 
@@ -289,7 +284,7 @@ def crea_pezzi_cella(valore_cella, x, y, settings):
     sotto += MURO
     return sopra, mezzo, sotto
 
-def disegna_maze(griglia, settings):
+def disegna_maze(griglia: list[list[int]], settings) -> None:
     for y, riga_numeri in enumerate(griglia):
         linea_sopra = ""
         linea_mezzo = ""
