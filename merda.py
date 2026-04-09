@@ -230,11 +230,12 @@ def maze_res(maze: MazeGenerator, grid: list[list[int]]) -> list[tuple[int, int,
             stack.append((current_x, current_y, direction))
             visited.add((nx, ny))
             current_x, current_y = nx, ny
+            neighbours.clear()
         else:
             if not stack:
                 return []
             current_x, current_y, _ = stack.pop()
-    stack.append((maze.exit[0], maze.exit[1], "Nulla"))
+    #stack.append((maze.exit[0], maze.exit[1], "Nulla"))
 
     return stack
 
