@@ -1,4 +1,4 @@
-import sys
+import sys, time
 
 def config(namefile: str) -> dict[str, str]:
 
@@ -238,9 +238,9 @@ def maze_res(maze: MazeGenerator, grid: list[list[int]]) -> list[tuple[int, int,
 
     return stack
 
-def crea_pezzi_cella(valore_cella: int, x: int, y: int, settings, percorso_coords: list[tuple[int, int]], risolvi: bool) -> tuple[str, str, str]:
+def crea_pezzi_cella(valore_cella: int, x: int, y: int, settings, percorso_coords: list[tuple[int, int]], risolvi: bool, colore) -> tuple[str, str, str]:
     RESET = "\033[0m"
-    MURO = "\033[95m" + "██" + RESET    
+    MURO = colore + "██" + RESET    
     VUOTO = "\033[96m" + "██" + RESET
     ENTRY = "\033[92m" + "██" + RESET
     EXIT = "\033[91m" + "██" + RESET
@@ -296,14 +296,14 @@ def crea_pezzi_cella(valore_cella: int, x: int, y: int, settings, percorso_coord
     sotto += MURO
     return sopra, mezzo, sotto
 
-def disegna_maze(griglia: list[list[int]], settings, percorso, risolvi) -> None:
+def disegna_maze(griglia: list[list[int]], settings, percorso, risolvi, colore) -> None:
     percorso_coords = [(cella[0], cella[1]) for cella in percorso]
     for y, riga_numeri in enumerate(griglia):
         linea_sopra = ""
         linea_mezzo = ""
         linea_sotto = ""
         for x, valore in enumerate(riga_numeri):
-            p_sopra, p_mezzo, p_sotto = crea_pezzi_cella(valore, x, y, settings, percorso_coords, risolvi)
+            p_sopra, p_mezzo, p_sotto = crea_pezzi_cella(valore, x, y, settings, percorso_coords, risolvi, colore)
             linea_sopra += p_sopra
             linea_mezzo += p_mezzo
             linea_sotto += p_sotto
@@ -311,15 +311,44 @@ def disegna_maze(griglia: list[list[int]], settings, percorso, risolvi) -> None:
         print(linea_mezzo)
         print(linea_sotto)
 
-def main() :
-    settings = mazeconfig(config("config_prova.txt"))
+def main() -> None:
+    if len(sys.argv) != 2:
+        print("Errore: Numero di argomenti sbagliato.")
+        print("Usare: python3 a_maze_ing.py <config_file>")
+        sys.exit(1)
+    config_path = sys.argv[1]
+    settings = mazeconfig(config(config_path))
     maze = MazeGenerator(settings)
     griglia = maze.generate_maze()
-    print("--- LABIRINTO GENERATO ---")
     soluzione = maze_res(maze, griglia)
-    disegna_maze(griglia, settings, soluzione, False)
-    print()
-    disegna_maze(griglia, settings, soluzione, True)
+    lista_colori = ["\033[95m", "\033[94m", "\033[97m", "\033[93m"]
+    indice = 0
+    risolvi = False
+    while True:
+        # questo puliosce lo schermo come? booooooo
+        print("\033[H\033[J", end="") 
+        colore = lista_colori[indice]
+        print("A-Maze-ing======")
+        disegna_maze(griglia, settings, soluzione, risolvi, colore)
+        print("\n1. generare nuovo labirinto")
+        print("2. mostrate percorso")
+        print("3. cambiare colore")
+        print("4. uscire")
+        scelta = input("\nscegliiiiii: ")
+        if scelta == "1":
+            griglia = maze.generate_maze()
+            soluzione = maze_res(maze, griglia)
+        elif scelta == "2":
+            risolvi = not risolvi 
+        elif scelta == "3":
+            # Ruota i colori dei muri 
+            indice = (indice + 1) % len(lista_colori)
+        elif scelta == "4":
+            print("Ciaoooo")
+            break
+        else:
+            print("comando non trovato! riprova")
+            time.sleep(1.5)
 
 
 main()
