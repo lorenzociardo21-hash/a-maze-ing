@@ -298,6 +298,6 @@ def main():
     settings = mazeconfig(config("config_prova.txt"))
     maze = MazeGenerator(settings)
 
-    disegna_maze(maze.generate_maze())
+    disegna_maze(maze.generate_maze(), settings)
 
 main()
