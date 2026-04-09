@@ -241,9 +241,18 @@ def crea_pezzi_cella(valore_cella, x, y, settings):
     RESET = "\033[0m"
     MURO = "\033[95m" + "█" + RESET    
     VUOTO = "\033[96m" + "█" + RESET
-    ENTRY = "\033[92m" + "E" + RESET
-    EXIT = "\033[94m" + "X" + RESET
-    QUARANTADUE = "\033[95m" + "█" + RESET 
+    ENTRY = "\033[92m" + "█" + RESET
+    EXIT = "\033[91m" + "█" + RESET
+    QUARANTADUE = "\033[99m" + "█" + RESET 
+    if valore_cella == 15:
+        MURO = QUARANTADUE
+        VUOTO = QUARANTADUE
+    if (x, y) == settings.entry:
+        MURO = ENTRY
+        VUOTO = ENTRY
+    if (x, y) == settings.exit:
+        MURO = EXIT
+        VUOTO = EXIT
     sopra = MURO
     mezzo = ""
     sotto = MURO
