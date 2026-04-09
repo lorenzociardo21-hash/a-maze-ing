@@ -244,7 +244,7 @@ def crea_pezzi_cella(valore_cella: int, x: int, y: int, settings, percorso_coord
     ENTRY = "\033[92m" + "█" + RESET
     EXIT = "\033[91m" + "█" + RESET
     QUARANTADUE = "\033[99m" + "█" + RESET
-    PATH_COLOR = "\033[94m" + "█" + RESET
+    PATH_COLOR = "\033[92m" + "█" + RESET
     if valore_cella == 15:
         MURO = QUARANTADUE
         VUOTO = QUARANTADUE
