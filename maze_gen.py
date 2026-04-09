@@ -14,7 +14,6 @@ PATTERN_42 = [
     (4, 0), (5, 0), (6, 0), (6, 1), (6, 2), (5, 2), (4, 2), (4, 3), (4, 4), (5, 4), (6, 4), #2
 ]
 
-
 class MazeGenerator:
     def __init__(self, maze) -> None:
         self.width: int = maze.width
@@ -25,7 +24,7 @@ class MazeGenerator:
 
     def create_grid(self) -> list[list[int]]:
         '''ritorna una griglia piena di 15, quindi tutte mura'''
-        return [[15 for _ in range(self.width)] for _ in range(self.height)]
+        return [[15 for _ in range(self.width + 1)] for _ in range(self.height + 1)]
     
     def pattern42(self) -> set[tuple[int, int]]:
         center_x = self.width // 2 - 3
@@ -33,7 +32,7 @@ class MazeGenerator:
         return {(center_x + dx, center_y + dy) for dx, dy in PATTERN_42}
 
     def check_bounds(self, x: int, y: int):
-        return 0 <= x < self.width and 0 <= y < self.height
+        return 0 <= x <= self.width and 0 <= y <= self.height
 
     def remove_wall(self, grid: list[list[int]],
                     x: int,
