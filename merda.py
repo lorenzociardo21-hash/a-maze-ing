@@ -44,8 +44,8 @@ class mazeconfig:
             self.exit = (int(x_parti[0]), int(x_parti[1]))
             self.output_file = dati_estratti["OUTPUT_FILE"]
             self.perfect = dati_estratti["PERFECT"] == "True"
-            if self.entry[0] < 0 or self.entry[0] >= self.width or \
-               self.entry[1] < 0 or self.entry[1] >= self.height:
+            if self.entry[0] < 0 or self.entry[0] > self.width or \
+               self.entry[1] < 0 or self.entry[1] > self.height:
                 print("Errore: L'entrata è fuori dal labirinto!")
                 sys.exit(1)
             if self.exit[0] < 0 or self.exit[0] > self.width or \
@@ -95,7 +95,7 @@ class MazeGenerator:
 
     def create_grid(self) -> list[list[int]]:
         '''ritorna una griglia piena di 15, quindi tutte mura'''
-        return [[15 for _ in range(self.width)] for _ in range(self.height)]
+        return [[15 for _ in range(self.width + 1)] for _ in range(self.height + 1)]
     
     def pattern42(self) -> set[tuple[int, int]]:
         center_x = self.width // 2 - 3
@@ -103,7 +103,7 @@ class MazeGenerator:
         return {(center_x + dx, center_y + dy) for dx, dy in PATTERN_42}
 
     def check_bounds(self, x: int, y: int):
-        return 0 <= x < self.width and 0 <= y < self.height
+        return 0 <= x <= self.width and 0 <= y <= self.height
 
     def remove_wall(self, grid: list[list[int]],
                     x: int,
@@ -234,17 +234,18 @@ def maze_res(maze: MazeGenerator, grid: list[list[int]]) -> list[tuple[int, int,
             if not stack:
                 return []
             current_x, current_y, _ = stack.pop()
+    stack.append((maze.exit[0], maze.exit[1], "Nulla"))
 
     return stack
 
 def crea_pezzi_cella(valore_cella: int, x: int, y: int, settings, percorso_coords: list[tuple[int, int]], risolvi: bool) -> tuple[str, str, str]:
     RESET = "\033[0m"
-    MURO = "\033[95m" + "█" + RESET    
-    VUOTO = "\033[96m" + "█" + RESET
-    ENTRY = "\033[92m" + "█" + RESET
-    EXIT = "\033[91m" + "█" + RESET
-    QUARANTADUE = "\033[99m" + "█" + RESET
-    PATH_COLOR = "\033[92m" + "█" + RESET
+    MURO = "\033[95m" + "██" + RESET    
+    VUOTO = "\033[96m" + "██" + RESET
+    ENTRY = "\033[92m" + "██" + RESET
+    EXIT = "\033[91m" + "██" + RESET
+    QUARANTADUE = "\033[99m" + "██" + RESET
+    PATH_COLOR = "\033[92m" + "██" + RESET
     if valore_cella == 15:
         MURO = QUARANTADUE
         VUOTO = QUARANTADUE
@@ -317,6 +318,7 @@ def main():
     print("--- LABIRINTO GENERATO ---")
     soluzione = maze_res(maze, griglia)
     disegna_maze(griglia, settings, soluzione, False)
+    print()
     disegna_maze(griglia, settings, soluzione, True)
 
 
