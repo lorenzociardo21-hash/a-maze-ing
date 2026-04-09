@@ -5,6 +5,7 @@ DIRECTIONS = {
     "W": {"num": 8, "opposite": "E", "dx": - 1, "dy": 0},
 }
 
+
 def get_neighbours(grid: list[list[int]], x: int, y: int, visited: set) -> list[tuple[int, int, str]]:
     neighbours = []
     for direction, values in DIRECTIONS.items():
@@ -29,9 +30,11 @@ def maze_res(maze: MazeGenerator, grid: list[list[int]]) -> list[tuple[int, int,
             stack.append((current_x, current_y, direction))
             visited.add((nx, ny))
             current_x, current_y = nx, ny
+            neighbours.clear()
         else:
             if not stack:
                 return []
             current_x, current_y, _ = stack.pop()
+    #stack.append((maze.exit[0], maze.exit[1], "Nulla"))
 
     return stack
