@@ -263,7 +263,7 @@ def crea_pezzi_cella(valore_cella: int, x: int, y: int, settings, percorso_coord
     else:
         mezzo += VUOTO
     
-    # Controllo per Entry, Exit e 42
+    # Controllo per Entry, Exit e 42 e percorso
     if (x, y) == settings.entry:
         mezzo += ENTRY
     elif (x, y) == settings.exit:
@@ -271,7 +271,7 @@ def crea_pezzi_cella(valore_cella: int, x: int, y: int, settings, percorso_coord
     elif valore_cella == 15: # Cella chiusa per il pattern 42
         mezzo += QUARANTADUE
     elif (x, y) in percorso_coords and risolvi:
-        mezzo = PATH_COLOR
+        mezzo += PATH_COLOR
     else:
         mezzo += VUOTO 
         
@@ -289,6 +289,7 @@ def crea_pezzi_cella(valore_cella: int, x: int, y: int, settings, percorso_coord
 
 def disegna_maze(griglia: list[list[int]], settings, percorso, risolvi) -> None:
     percorso_coords = [(cella[0], cella[1]) for cella in percorso]
+    print(percorso_coords)
     for y, riga_numeri in enumerate(griglia):
         linea_sopra = ""
         linea_mezzo = ""
@@ -310,5 +311,6 @@ def main():
     soluzione = maze_res(maze, griglia)
     disegna_maze(griglia, settings, soluzione, False)
     disegna_maze(griglia, settings, soluzione, True)
+
 
 main()
