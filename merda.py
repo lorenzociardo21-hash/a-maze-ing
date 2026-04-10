@@ -261,7 +261,7 @@ def crea_pezzi_cella(valore_cella: int, x: int, y: int, settings, percorso_coord
 
     sopra = MURO
     mezzo = ""
-    sotto = MUROnuovicolori.append(colore)
+    sotto = MURO
     if valore_cella & 1: # il sopra
         sopra += MURO   # Chiudiamo il soffitto
     elif (x, y - 1) in percorso_coords and risolvi and (x, y) in percorso_coords:
@@ -307,7 +307,12 @@ def crea_pezzi_cella(valore_cella: int, x: int, y: int, settings, percorso_coord
 
 
 def sceltacolore(scelta_utente: int, colori_attuali: list[str]) -> list[str]:
-    palette = ["\033[95m", "\033[96m", "\033[97m", "\033[93m", "\033[94m", "\033[91m"]
+    palette = [
+        "\033[95m", "\033[96m", "\033[97m", "\033[93m", "\033[94m", "\033[91m",
+        "\033[92m", "\033[90m", "\033[31m", "\033[32m", "\033[33m", "\033[34m",
+        "\033[35m", "\033[36m"
+    ]
+
     if scelta_utente in [1, 2, 3]:
         idx_da_cambiare = scelta_utente - 1
         colore_vecchio = colori_attuali[idx_da_cambiare]
@@ -315,25 +320,29 @@ def sceltacolore(scelta_utente: int, colori_attuali: list[str]) -> list[str]:
             indice_palette = palette.index(colore_vecchio)
         except ValueError:
             indice_palette = 0
+            
         trovato = False
         while not trovato:
             indice_palette = (indice_palette + 1) % len(palette)
             nuovo_colore = palette[indice_palette]
             if nuovo_colore not in colori_attuali:
                 trovato = True
+                
         colori_attuali[idx_da_cambiare] = nuovo_colore
         return colori_attuali
+
     elif scelta_utente == 4:
         nuovicolori = []
-        for colore in colori_attuali:
+        for _ in colori_attuali:
             trovato = False
             while not trovato:
-                indice_palette = random.randint(0, len(palette) - 1)
-                colore = palette[indice_palette]
-                if colore not in colori_attuali:
-                    nuovicolori.append(colore)
+                indice_p = random.randint(0, len(palette) - 1)
+                colore_pescato = palette[indice_p]
+                if colore_pescato not in nuovicolori:
+                    nuovicolori.append(colore_pescato)
                     trovato = True
         return nuovicolori
+    return colori_attuali
                 
 
 def disegna_maze(griglia: list[list[int]], settings, percorso, risolvi, colore) -> None:
@@ -386,13 +395,22 @@ def main() -> None:
     colore = ["\033[95m", "\033[97m", "\033[93m"]
     risolvi = False
     while True:
-        print("\033[H\033[J", end="") 
-        print("A-Maze-ing")
+        print("\033[H\033[J", end="")
+        # Titolo a caratteri pieni (Solid Blocks)
+        title = r"""
+        █████           ███    ███   █████  ███████ ███████          ██  ███    ██   ██████ 
+        ██   ██          ████  ████  ██   ██    ███  ██               ██  ████   ██  ██      
+        ███████   ███    ██ ████ ██  ███████   ███   █████     ███    ██  ██ ██  ██  ██   ███
+        ██   ██          ██  ██  ██  ██   ██  ███    ██               ██  ██  ██ ██  ██    ██
+        ██   ██          ██      ██  ██   ██ ███████ ███████          ██  ██   ████   ██████ 
+        """
+
+        print(title)
         disegna_maze(griglia, settings, soluzione, risolvi, colore)
-        print("\n1. Generare nuovo labirinto")
-        print("2. Mostrate percorso")
-        print("3. Cambiare colore")
-        print("4. Uscire")
+        print("\n\033[91m1. Generare nuovo labirinto\033[0m")
+        print("\033[95m2. Mostrate percorso\033[0m")
+        print("\033[97m3. Cambiare colore\033[0m")
+        print("\033[93m4. Uscire\033[0m")
         scelta = input("\nscegliiiiii: ")
         if scelta == "1":
             risolvi = False
@@ -406,16 +424,8 @@ def main() -> None:
                 quale = input("Quale parte vuoi cambiare? ")
                 if quale in ["1", "2", "3", "4"]:
                     colore= sceltacolore(int(quale), colore)
-                
         elif scelta == "4":
             print("Ciaoooo")
             break
-        else:
-            print("comando non trovato! riprova")
-            time.sleep(1.5)
-
-
-
-
 
 main()
