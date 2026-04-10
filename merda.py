@@ -238,13 +238,13 @@ def maze_res(maze: MazeGenerator, grid: list[list[int]]) -> list[tuple[int, int,
 
     return stack
 
-def crea_pezzi_cella(valore_cella: int, x: int, y: int, settings, percorso_coords, risolvi: bool, colore, i) -> tuple[str, str, str]:
+def crea_pezzi_cella(valore_cella: int, x: int, y: int, settings, percorso_coords, risolvi: bool, colore) -> tuple[str, str, str]:
     RESET = "\033[0m"
-    MURO = colore + "██" + RESET
-    VUOTO = "\033[96m" + "██" + RESET
+    MURO = colore[0] + "██" + RESET
+    VUOTO = colore[1] + "██" + RESET
     ENTRY = "\033[92m" + "██" + RESET
     EXIT = "\033[91m" + "██" + RESET
-    QUARANTADUE = "\033[99m" + "██" + RESET
+    QUARANTADUE = colore[2]+ "██" + RESET
     PATH_COLOR = "\033[92m" + "██" + RESET
     if valore_cella == 15:
         MURO = QUARANTADUE
@@ -252,7 +252,7 @@ def crea_pezzi_cella(valore_cella: int, x: int, y: int, settings, percorso_coord
 
     sopra = MURO
     mezzo = ""
-    sotto = MURO
+    sotto = MUROnuovicolori.append(colore)
     if valore_cella & 1: # il sopra
         sopra += MURO   # Chiudiamo il soffitto
     elif (x, y - 1) in percorso_coords and risolvi and (x, y) in percorso_coords:
@@ -296,6 +296,37 @@ def crea_pezzi_cella(valore_cella: int, x: int, y: int, settings, percorso_coord
     sotto += MURO
     return sopra, mezzo, sotto
 
+
+def sceltacolore(scelta_utente: int, colori_attuali: list[str]) -> list[str]:
+    palette = ["\033[95m", "\033[96m", "\033[97m", "\033[93m", "\033[94m", "\033[91m"]
+    if scelta_utente in [1, 2, 3]:
+        idx_da_cambiare = scelta_utente - 1
+        colore_vecchio = colori_attuali[idx_da_cambiare]
+        try:
+            indice_palette = palette.index(colore_vecchio)
+        except ValueError:
+            indice_palette = 0
+        trovato = False
+        while not trovato:
+            indice_palette = (indice_palette + 1) % len(palette)
+            nuovo_colore = palette[indice_palette]
+            if nuovo_colore not in colori_attuali:
+                trovato = True
+        colori_attuali[idx_da_cambiare] = nuovo_colore
+        return colori_attuali
+    elif scelta_utente == 4:
+        nuovicolori = []
+        for colore in colori_attuali:
+            trovato = False
+            while not trovato:
+                indice_palette = random.randint(0, len(palette) - 1)
+                colore = palette[indice_palette]
+                if colore not in colori_attuali:
+                    nuovicolori.append(colore)
+                    trovato = True
+        return nuovicolori
+                
+
 def disegna_maze(griglia: list[list[int]], settings, percorso, risolvi, colore) -> None:
     percorso_coords = [(cella[0], cella[1]) for cella in percorso]
     i = 0
@@ -309,7 +340,7 @@ def disegna_maze(griglia: list[list[int]], settings, percorso, risolvi, colore) 
                 linea_mezzo = ""
                 linea_sotto = ""
                 for x, valore in enumerate(riga_numeri):
-                    p_sopra, p_mezzo, p_sotto = crea_pezzi_cella(valore, x, y, settings, percorsofinito, risolvi, colore, i)
+                    p_sopra, p_mezzo, p_sotto = crea_pezzi_cella(valore, x, y, settings, percorsofinito, risolvi, colore)
                     linea_sopra += p_sopra
                     linea_mezzo += p_mezzo
                     linea_sotto += p_sotto
@@ -317,14 +348,14 @@ def disegna_maze(griglia: list[list[int]], settings, percorso, risolvi, colore) 
                 print(linea_mezzo)
                 print(linea_sotto)
             i += 1
-            time.sleep(0.1)
+            time.sleep(0.08)
     else:
         for y, riga_numeri in enumerate(griglia):
             linea_sopra = ""
             linea_mezzo = ""
             linea_sotto = ""
             for x, valore in enumerate(riga_numeri):
-                p_sopra, p_mezzo, p_sotto = crea_pezzi_cella(valore, x, y, settings, percorso_coords, risolvi, colore, i)
+                p_sopra, p_mezzo, p_sotto = crea_pezzi_cella(valore, x, y, settings, percorso_coords, risolvi, colore)
                 linea_sopra += p_sopra
                 linea_mezzo += p_mezzo
                 linea_sotto += p_sotto
@@ -343,18 +374,16 @@ def main() -> None:
     maze = MazeGenerator(settings)
     griglia = maze.generate_maze()
     soluzione = maze_res(maze, griglia)
-    lista_colori = ["\033[95m", "\033[94m", "\033[97m", "\033[93m"]
-    indice = 0
+    colore = ["\033[95m", "\033[97m", "\033[93m"]
     risolvi = False
     while True:
         print("\033[H\033[J", end="") 
-        colore = lista_colori[indice]
-        print("A-Maze-ing======")
+        print("A-Maze-ing")
         disegna_maze(griglia, settings, soluzione, risolvi, colore)
-        print("\n1. generare nuovo labirinto")
-        print("2. mostrate percorso")
-        print("3. cambiare colore")
-        print("4. uscire")
+        print("\n1. Generare nuovo labirinto")
+        print("2. Mostrate percorso")
+        print("3. Cambiare colore")
+        print("4. Uscire")
         scelta = input("\nscegliiiiii: ")
         if scelta == "1":
             risolvi = False
@@ -363,15 +392,21 @@ def main() -> None:
         elif scelta == "2":
             risolvi = not risolvi 
         elif scelta == "3":
-            # Ruota i colori dei muri
-            risolvi = False
-            indice = (indice + 1) % len(lista_colori)
+                risolvi = False
+                print("1. Muri | 2. Corridoio | 3. 42 | 4. Scelta pazzerella")
+                quale = input("Quale parte vuoi cambiare? ")
+                if quale in ["1", "2", "3", "4"]:
+                    colore= sceltacolore(int(quale), colore)
+                
         elif scelta == "4":
             print("Ciaoooo")
             break
         else:
             print("comando non trovato! riprova")
             time.sleep(1.5)
+
+
+
 
 
 main()
