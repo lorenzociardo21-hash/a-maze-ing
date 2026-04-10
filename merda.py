@@ -238,9 +238,9 @@ def maze_res(maze: MazeGenerator, grid: list[list[int]]) -> list[tuple[int, int,
 
     return stack
 
-def crea_pezzi_cella(valore_cella: int, x: int, y: int, settings, percorso_coords: list[tuple[int, int]], risolvi: bool, colore) -> tuple[str, str, str]:
+def crea_pezzi_cella(valore_cella: int, x: int, y: int, settings, percorso_coords, risolvi: bool, colore, i) -> tuple[str, str, str]:
     RESET = "\033[0m"
-    MURO = colore + "██" + RESET    
+    MURO = colore + "██" + RESET
     VUOTO = "\033[96m" + "██" + RESET
     ENTRY = "\033[92m" + "██" + RESET
     EXIT = "\033[91m" + "██" + RESET
@@ -298,18 +298,40 @@ def crea_pezzi_cella(valore_cella: int, x: int, y: int, settings, percorso_coord
 
 def disegna_maze(griglia: list[list[int]], settings, percorso, risolvi, colore) -> None:
     percorso_coords = [(cella[0], cella[1]) for cella in percorso]
-    for y, riga_numeri in enumerate(griglia):
-        linea_sopra = ""
-        linea_mezzo = ""
-        linea_sotto = ""
-        for x, valore in enumerate(riga_numeri):
-            p_sopra, p_mezzo, p_sotto = crea_pezzi_cella(valore, x, y, settings, percorso_coords, risolvi, colore)
-            linea_sopra += p_sopra
-            linea_mezzo += p_mezzo
-            linea_sotto += p_sotto
-        print(linea_sopra)
-        print(linea_mezzo)
-        print(linea_sotto)
+    i = 0
+    percorsofinito = []
+    if risolvi:
+        while i < len(percorso):
+            print("\033[H\033[J", end="") 
+            percorsofinito.append(percorso_coords[i]) 
+            for y, riga_numeri in enumerate(griglia):
+                linea_sopra = ""
+                linea_mezzo = ""
+                linea_sotto = ""
+                for x, valore in enumerate(riga_numeri):
+                    p_sopra, p_mezzo, p_sotto = crea_pezzi_cella(valore, x, y, settings, percorsofinito, risolvi, colore, i)
+                    linea_sopra += p_sopra
+                    linea_mezzo += p_mezzo
+                    linea_sotto += p_sotto
+                print(linea_sopra)
+                print(linea_mezzo)
+                print(linea_sotto)
+            i += 1
+            time.sleep(0.1)
+    else:
+        for y, riga_numeri in enumerate(griglia):
+            linea_sopra = ""
+            linea_mezzo = ""
+            linea_sotto = ""
+            for x, valore in enumerate(riga_numeri):
+                p_sopra, p_mezzo, p_sotto = crea_pezzi_cella(valore, x, y, settings, percorso_coords, risolvi, colore, i)
+                linea_sopra += p_sopra
+                linea_mezzo += p_mezzo
+                linea_sotto += p_sotto
+            print(linea_sopra)
+            print(linea_mezzo)
+            print(linea_sotto)
+        
 
 def main() -> None:
     if len(sys.argv) != 2:
@@ -325,7 +347,6 @@ def main() -> None:
     indice = 0
     risolvi = False
     while True:
-        # questo puliosce lo schermo come? booooooo
         print("\033[H\033[J", end="") 
         colore = lista_colori[indice]
         print("A-Maze-ing======")
@@ -336,12 +357,14 @@ def main() -> None:
         print("4. uscire")
         scelta = input("\nscegliiiiii: ")
         if scelta == "1":
+            risolvi = False
             griglia = maze.generate_maze()
             soluzione = maze_res(maze, griglia)
         elif scelta == "2":
             risolvi = not risolvi 
         elif scelta == "3":
-            # Ruota i colori dei muri 
+            # Ruota i colori dei muri
+            risolvi = False
             indice = (indice + 1) % len(lista_colori)
         elif scelta == "4":
             print("Ciaoooo")
