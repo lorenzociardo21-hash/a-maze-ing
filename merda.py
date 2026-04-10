@@ -216,13 +216,36 @@ def get_neighbours(grid: list[list[int]], x: int, y: int, visited: set) -> list[
     return neighbours
 
 
-def check_distance(neighbours: list[tuple[int, int, str]], exit: tuple[int, int]) -> tuple[int, int, str]:
-    x1, y1, direction1 = neighbours[0]
-    d_min = ((exit[0] - x1)**2 + (exit[1] - y1) **2)**0.5
+def distance(x1: int, y1: int, exit: tuple[int, int]) -> int:
+    return ((exit[0] - x1)**2 + (exit[1] - y1) **2)**0.5
+
+
+def find_dir(grid: list[list[int]], x: int, y: int, exit: tuple[int, int], visited: set) -> tuple[int, int, str]:
+    min_dist = 2*32
+    min_x, min_y = x, y
+    direction = None
+    for direc, values in DIRECTIONS.items():
+        if not grid[y][x] & values["num"]:
+            dx, dy = x + values["dx"], y + values["dy"]
+            if (dx, dy) not in visited:
+                d = distance(dx, dy, exit)
+                if d < min_dist:
+                    min_dist, min_x, min_y, direction = d, dx, dy, direc
+    return min_dist, min_x, min_y, direction
+    
+
+def check_distance(grid: list[list[int]], neighbours: list[tuple[int, int, str]], exit: tuple[int, int], visited: set) -> tuple[int, int, str]:
+    min_x, min_y, direction_min = neighbours[0]
+    min_ndist, _, _, _ = find_dir(grid, min_x, min_y, exit, visited)
+    if (min_x, min_y) == exit:
+        return min_x, min_y, direction_min
     for x, y, direction in neighbours[1:]:
-        if d :=((exit[0] - x)**2 + (exit[1] - y) **2)**0.5 < d_min:
-            x1, y1, d_min, direction1 = x, y, d, direction
-    return x1, y1, direction1
+        if distance(x, y, exit) < distance(min_x, min_y, exit) or (x, y) == exit:
+            next_dist, nx, ny, _ = find_dir(grid, x, y, exit, visited)
+            if next_dist < min_ndist or (nx, ny) == exit or (x, y) == exit:
+                min_x, min_y, direction_min = x, y, direction
+                min_ndist = next_dist
+    return min_x, min_y, direction_min
 
 
 def maze_res(maze: MazeGenerator, grid: list[list[int]]) -> list[tuple[int, int, str]]:
@@ -235,7 +258,7 @@ def maze_res(maze: MazeGenerator, grid: list[list[int]]) -> list[tuple[int, int,
         neighbours = get_neighbours(grid, current_x, current_y, visited)
 
         if neighbours:
-            nx, ny, direction = check_distance(neighbours, maze.exit)
+            nx, ny, direction = check_distance(grid, neighbours, maze.exit, visited)
             stack.append((current_x, current_y, direction))
             visited.add((nx, ny))
             current_x, current_y = nx, ny
@@ -326,7 +349,7 @@ def disegna_maze(griglia: list[list[int]], settings, percorso, risolvi, colore) 
                 print(linea_mezzo)
                 print(linea_sotto)
             i += 1
-            time.sleep(0.1)
+            #time.sleep(0.1)
     else:
         for y, riga_numeri in enumerate(griglia):
             linea_sopra = ""
