@@ -5,7 +5,7 @@ HEIGHT=15
 #Entry coordinates (x, y)
 ENTRY=0, 0
 #Exit coordinates (x, y)
-EXIT=10, 10
+EXIT=20, 15
 #Output filename
 OUTPUT_FILE=maze.txt
 #Is the name perfect?

@@ -221,7 +221,7 @@ def distance(x1: int, y1: int, exit: tuple[int, int]) -> int:
 
 
 def find_dir(grid: list[list[int]], x: int, y: int, exit: tuple[int, int], visited: set) -> tuple[int, int, str]:
-    min_dist = 2*32
+    min_dist = 2**32
     min_x, min_y = x, y
     direction = None
     for direc, values in DIRECTIONS.items():
@@ -232,16 +232,36 @@ def find_dir(grid: list[list[int]], x: int, y: int, exit: tuple[int, int], visit
                 if d < min_dist:
                     min_dist, min_x, min_y, direction = d, dx, dy, direc
     return min_dist, min_x, min_y, direction
-    
+
+
+def check_stack(grid: list[list[int]], stack: list[tuple[int, int, str]]) -> None:
+    changed = True
+    while changed:
+        changed = False
+        pos_index = {(x, y): i for i, (x, y, _) in enumerate(stack)}
+        for i, (x, y, _) in enumerate(stack):
+            for direc, val in DIRECTIONS.items():
+                dx, dy = x + val["dx"], y + val["dy"]
+                if (dx, dy) in pos_index:
+                    j = pos_index[(dx, dy)]
+                    if j > i + 1 and not grid[y][x] & val["num"]:
+                        stack = stack[:i + 1] + stack[j:]
+                        stack[i] = (x, y, direc)
+                        changed = True
+                        break
+            if changed:
+                break
+    return stack
+
 
 def check_distance(grid: list[list[int]], neighbours: list[tuple[int, int, str]], exit: tuple[int, int], visited: set) -> tuple[int, int, str]:
     min_x, min_y, direction_min = neighbours[0]
-    min_ndist, _, _, _ = find_dir(grid, min_x, min_y, exit, visited)
+    min_ndist, _, _, _ = find_dir(grid, min_x, min_y, exit, visited | {(min_x, min_y)})
     if (min_x, min_y) == exit:
         return min_x, min_y, direction_min
     for x, y, direction in neighbours[1:]:
         if distance(x, y, exit) < distance(min_x, min_y, exit) or (x, y) == exit:
-            next_dist, nx, ny, _ = find_dir(grid, x, y, exit, visited)
+            next_dist, nx, ny, _ = find_dir(grid, x, y, exit, visited | {(x, y)})
             if next_dist < min_ndist or (nx, ny) == exit or (x, y) == exit:
                 min_x, min_y, direction_min = x, y, direction
                 min_ndist = next_dist
@@ -266,9 +286,12 @@ def maze_res(maze: MazeGenerator, grid: list[list[int]]) -> list[tuple[int, int,
             if not stack:
                 return []
             current_x, current_y, _ = stack.pop()
-    stack.append((maze.exit[0], maze.exit[1], "Nulla"))
+
+    stack.append((maze.exit[0], maze.exit[1], None))
+    stack = check_stack(grid, stack)
 
     return stack
+
 
 def crea_pezzi_cella(valore_cella: int, x: int, y: int, settings, percorso_coords, risolvi: bool, colore) -> tuple[str, str, str]:
     RESET = "\033[0m"
