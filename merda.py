@@ -268,7 +268,36 @@ def check_distance(grid: list[list[int]], neighbours: list[tuple[int, int, str]]
     return min_x, min_y, direction_min
 
 
-def maze_res(maze: MazeGenerator, grid: list[list[int]]) -> list[tuple[int, int, str]]:
+def maze_res_astar(maze: MazeGenerator, grid: list[list[int]]) -> list[tuple[int, int, str]]:
+    start = maze.entry
+    exit = maze.exit
+    stack = [(distance(*start, exit), 0, start[0], start[1])]
+    came_from = {start: None}
+    steps_made = {start: 0}
+    while stack:
+        _, steps, x, y = stack.pop()
+        if (x, y) == exit:
+            path = []
+            current = (x, y)
+            while came_from[current] is not None:
+                prev, direction = came_from[current]
+                path.append((prev[0], prev[1], direction))
+                current = prev
+            path.reverse()
+            path.append((exit[0], exit[1], None))
+            return path
+        for nx, ny, direction in get_neighbours(grid, x, y, came_from):
+            new_step = steps + 1
+            if (nx, ny) not in steps_made or new_step < steps_made[(nx, ny)]:
+                steps_made[(nx, ny)] = new_step
+                a_score = new_step + distance(nx, ny, exit)
+                stack.append((a_score, new_step, nx, ny))
+                stack = sorted(stack, key=lambda x: x[0], reverse=True)
+                came_from[(nx, ny)] = ((x, y), direction)
+    return []
+
+
+def maze_res_mix_algo(maze: MazeGenerator, grid: list[list[int]]) -> list[tuple[int, int, str]]:
     visited = set()
     stack = []
     current_x, current_y = maze.entry
@@ -437,7 +466,7 @@ def main() -> None:
     settings = mazeconfig(config(config_path))
     maze = MazeGenerator(settings)
     griglia = maze.generate_maze()
-    soluzione = maze_res(maze, griglia)
+    soluzione = maze_res_mix_algo(maze, griglia)
     colore = ["\033[95m", "\033[97m", "\033[93m"]
     risolvi = False
     while True:
@@ -461,9 +490,9 @@ def main() -> None:
         if scelta == "1":
             risolvi = False
             griglia = maze.generate_maze()
-            soluzione = maze_res(maze, griglia)
+            soluzione = maze_res_mix_algo(maze, griglia)
         elif scelta == "2":
-            risolvi = not risolvi 
+            risolvi = not risolvi
         elif scelta == "3":
                 risolvi = False
                 print("1. Muri | 2. Corridoio | 3. 42 | 4. Scelta pazzerella")
