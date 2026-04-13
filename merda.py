@@ -171,7 +171,8 @@ class MazeGenerator:
     def generate_maze(self, seed: int = None) -> list[list[int]]:
         '''genera il maze, sia con perfect che non, utilizza DFS, avendo una lista di visitati formata da tuple di coordinate
         e poi ha uno variabile stack dalla quale toglie la cella solo se non ha celle vicine, quindi non visitate, fuori dai limiti e celle del pattern'''
-
+        if seed is None:
+            seed = random.randrange(sys.maxsize)
         random.seed(seed)
         grid = self.create_grid()
         pattern_cells = set()
@@ -183,9 +184,8 @@ class MazeGenerator:
 
         while stack:
             x, y = stack[-1]
-            neighbours = self.unvisited_neighbours(x, y, pattern_cells, visited)
             neighbours = [
-                (nx, ny, direction) for nx, ny, direction in neighbours
+                (nx, ny, direction) for nx, ny, direction in self.unvisited_neighbours(x, y, pattern_cells, visited)
                 if not self.square_3x3(grid, nx, ny, visited)
             ]
 
@@ -322,7 +322,7 @@ def maze_res_mix_algo(maze: MazeGenerator, grid: list[list[int]]) -> list[tuple[
     return stack
 
 
-def crea_pezzi_cella(valore_cella: int, x: int, y: int, settings, percorso_coords, risolvi: bool, colore) -> tuple[str, str, str]:
+def crea_pezzi_cella(valore_cella: int, x: int, y: int, settings: mazeconfig, percorso_coords: list[tuple[int, int]], risolvi: bool, colore: str) -> tuple[str, str, str]:
     RESET = "\033[0m"
     MURO = colore[0] + "██" + RESET
     VUOTO = colore[1] + "██" + RESET
@@ -420,7 +420,7 @@ def sceltacolore(scelta_utente: int, colori_attuali: list[str]) -> list[str]:
     return colori_attuali
                 
 
-def disegna_maze(griglia: list[list[int]], settings, percorso, risolvi, colore) -> None:
+def disegna_maze(griglia: list[list[int]], settings: mazeconfig, percorso: list[tuple[int, int, str]], risolvi: bool, colore: str) -> None:
     percorso_coords = [(cella[0], cella[1]) for cella in percorso]
     i = 0
     percorsofinito = []
