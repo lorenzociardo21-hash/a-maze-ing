@@ -203,6 +203,10 @@ class MazeGenerator:
                 self.remove_wall(grid, x, y, d)
                 chosen_ones.pop()
 
+        coords_vietate = self.pattern42()
+        if self.entry in coords_vietate or self.exit in coords_vietate:
+            print("Errore: L'entrata o l'uscita cadono dentro il pattern 42!")
+            sys.exit(1)
         return grid
 
 
@@ -426,7 +430,7 @@ def disegna_maze(griglia: list[list[int]], settings: mazeconfig, percorso: list[
     percorsofinito = []
     if risolvi:
         while i < len(percorso):
-            print("\033[H\033[J", end="") 
+            print("\033[2J\033[H\033[3J", end="") 
             percorsofinito.append(percorso_coords[i]) 
             for y, riga_numeri in enumerate(griglia):
                 linea_sopra = ""
@@ -441,7 +445,7 @@ def disegna_maze(griglia: list[list[int]], settings: mazeconfig, percorso: list[
                 print(linea_mezzo)
                 print(linea_sotto)
             i += 1
-            #time.sleep(0.1)
+            time.sleep(0.1)
     else:
         for y, riga_numeri in enumerate(griglia):
             linea_sopra = ""
@@ -470,7 +474,7 @@ def main() -> None:
     colore = ["\033[95m", "\033[97m", "\033[93m"]
     risolvi = False
     while True:
-        print("\033[H\033[J", end="")
+        print("\033[2J\033[H\033[3J", end="")
         # Titolo a caratteri pieni (Solid Blocks)
         title = r"""
         █████           ███    ███   █████  ███████ ███████          ██  ███    ██   ██████ 
