@@ -422,15 +422,29 @@ def sceltacolore(scelta_utente: int, colori_attuali: list[str]) -> list[str]:
                     trovato = True
         return nuovicolori
     return colori_attuali
-                
+
+
+def printamazing() -> None:
+        title = r"""
+        █████           ███    ███   █████  ███████ ███████          ██  ███    ██   ██████ 
+        ██   ██          ████  ████  ██   ██    ███  ██               ██  ████   ██  ██      
+        ███████   ███    ██ ████ ██  ███████   ███   █████     ███    ██  ██ ██  ██  ██   ███
+        ██   ██          ██  ██  ██  ██   ██  ███    ██               ██  ██  ██ ██  ██    ██
+        ██   ██          ██      ██  ██   ██ ███████ ███████          ██  ██   ████   ██████ 
+        """
+        print(title)
 
 def disegna_maze(griglia: list[list[int]], settings: mazeconfig, percorso: list[tuple[int, int, str]], risolvi: bool, colore: str) -> None:
-    percorso_coords = [(cella[0], cella[1]) for cella in percorso]
+    percorso_coords = []
+    for cella in percorso:
+        nuova_coppia = (cella[0], cella[1])
+        percorso_coords.append(nuova_coppia)
     i = 0
     percorsofinito = []
     if risolvi:
         while i < len(percorso):
-            print("\033[2J\033[H\033[3J", end="") 
+            print("\033[2J\033[H\033[3J", end="")
+            printamazing()
             percorsofinito.append(percorso_coords[i]) 
             for y, riga_numeri in enumerate(griglia):
                 linea_sopra = ""
@@ -446,7 +460,9 @@ def disegna_maze(griglia: list[list[int]], settings: mazeconfig, percorso: list[
                 print(linea_sotto)
             i += 1
             time.sleep(0.1)
+        
     else:
+        printamazing()
         for y, riga_numeri in enumerate(griglia):
             linea_sopra = ""
             linea_mezzo = ""
@@ -460,6 +476,23 @@ def disegna_maze(griglia: list[list[int]], settings: mazeconfig, percorso: list[
             print(linea_mezzo)
             print(linea_sotto)
         
+def output(griglia, soluzione, settings):
+    esadecimale = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "A", "B", "C", "D", "E", "F"]
+    with open(settings.output_file, "w") as f:
+        for riga in griglia:
+            for valore in riga:
+                f.write(esadecimale[valore])
+            f.write("\n")
+        f.write(f"\n{settings.entry[0]},{settings.entry[1]}\n")
+        f.write(f"{settings.exit[0]},{settings.exit[1]}\n")
+        for valore in soluzione:
+            if valore[2] is not None:
+                f.write(valore[2])
+        f.write("\n")
+        
+    
+
+
 
 def main() -> None:
     if len(sys.argv) != 2:
@@ -471,40 +504,37 @@ def main() -> None:
     maze = MazeGenerator(settings)
     griglia = maze.generate_maze()
     soluzione = maze_res_mix_algo(maze, griglia)
+    output(griglia, soluzione, settings)
     colore = ["\033[95m", "\033[97m", "\033[93m"]
     risolvi = False
-    while True:
-        print("\033[2J\033[H\033[3J", end="")
-        # Titolo a caratteri pieni (Solid Blocks)
-        title = r"""
-        █████           ███    ███   █████  ███████ ███████          ██  ███    ██   ██████ 
-        ██   ██          ████  ████  ██   ██    ███  ██               ██  ████   ██  ██      
-        ███████   ███    ██ ████ ██  ███████   ███   █████     ███    ██  ██ ██  ██  ██   ███
-        ██   ██          ██  ██  ██  ██   ██  ███    ██               ██  ██  ██ ██  ██    ██
-        ██   ██          ██      ██  ██   ██ ███████ ███████          ██  ██   ████   ██████ 
-        """
-
-        print(title)
-        disegna_maze(griglia, settings, soluzione, risolvi, colore)
-        print("\n\033[91m1. Generare nuovo labirinto\033[0m")
-        print("\033[95m2. Mostrate percorso\033[0m")
-        print("\033[97m3. Cambiare colore\033[0m")
-        print("\033[93m4. Uscire\033[0m")
-        scelta = input("\nscegliiiiii: ")
-        if scelta == "1":
-            risolvi = False
-            griglia = maze.generate_maze()
-            soluzione = maze_res_mix_algo(maze, griglia)
-        elif scelta == "2":
-            risolvi = not risolvi
-        elif scelta == "3":
+    printamazing()
+    try:
+        while True:
+            print("\033[2J\033[H\033[3J", end="")
+            disegna_maze(griglia, settings, soluzione, risolvi, colore)
+            print("\n\033[91m1. Generare nuovo labirinto\033[0m")
+            print("\033[95m2. Mostrate percorso\033[0m")
+            print("\033[97m3. Cambiare colore\033[0m")
+            print("\033[93m4. Uscire\033[0m")
+            scelta = input("\nscegliiiiii: ")
+            if scelta == "1":
                 risolvi = False
-                print("1. Muri | 2. Corridoio | 3. 42 | 4. Scelta pazzerella")
-                quale = input("Quale parte vuoi cambiare? ")
-                if quale in ["1", "2", "3", "4"]:
-                    colore= sceltacolore(int(quale), colore)
-        elif scelta == "4":
-            print("Ciaoooo")
-            break
+                griglia = maze.generate_maze()
+                soluzione = maze_res_mix_algo(maze, griglia)
+                output(griglia, soluzione, settings)
+            elif scelta == "2":
+                risolvi = not risolvi
+            elif scelta == "3":
+                    risolvi = False
+                    print("1. Muri | 2. Corridoio | 3. 42 | 4. Scelta pazzerella")
+                    quale = input("Quale parte vuoi cambiare? ")
+                    if quale in ["1", "2", "3", "4"]:
+                        colore= sceltacolore(int(quale), colore)
+            elif scelta == "4":
+                print("Ciaoooo")
+                break
+    except (KeyboardInterrupt, EOFError):
+            print("\n\n\033[91mUscita forzata rilevata. Ciaoooo!\033[0m")
+
 
 main()
