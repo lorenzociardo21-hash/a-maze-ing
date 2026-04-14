@@ -233,13 +233,12 @@ class MazeGenerator:
                     nx, ny = x + DIRECTIONS[d]["dx"], y + DIRECTIONS[d]["dy"]
                     if self.check_bounds(nx, ny) and (nx, ny) not in pattern_cells:
                         walls.append((x, y, nx, ny, d))
-        
+
         random.shuffle(walls)
         for x1, y1, x2, y2, d in walls:
             if self.find((x1, y1), parent) != self.find((x2, y2), parent):
-                if not self.square_3x3(grid, x2, y2):
-                    self.union((x1, y1), (x2, y2), parent)
-                    self.remove_wall(grid, x1, y1, d)
+                self.union((x1, y1), (x2, y2), parent)
+                self.remove_wall(grid, x1, y1, d)
         
         return grid
 
@@ -577,7 +576,7 @@ def main() -> None:
     config_path = sys.argv[1]
     settings = mazeconfig(config(config_path))
     maze = MazeGenerator(settings)
-    griglia = maze.generate_maze()
+    griglia = maze.generate_maze_kruskal()
     soluzione = maze_res_mix_algo(maze, griglia)
     output(griglia, soluzione, settings)
     colore = ["\033[95m", "\033[97m", "\033[93m"]
@@ -594,7 +593,7 @@ def main() -> None:
             scelta = input("\nscegliiiiii: ")
             if scelta == "1":
                 risolvi = False
-                griglia = maze.generate_maze()
+                griglia = maze.generate_maze_kruskal()
                 soluzione = maze_res_mix_algo(maze, griglia)
                 output(griglia, soluzione, settings)
             elif scelta == "2":
