@@ -168,6 +168,81 @@ class MazeGenerator:
         k = int(len(walls) * percentage)
         return random.sample(walls, k)
 
+    def wall_to_list(self, x: int, y: int, wall_list: list[tuple[int, int, int, int, str]], visited: set, pattern_cells: set) -> None:
+        for d, val in DIRECTIONS.items():
+            nx, ny = x + val["dx"], y + val["dy"]
+            if self.check_bounds(nx, ny) and (nx, ny) not in visited and (nx, ny) not in pattern_cells:
+                wall_list.append((x, y, nx, ny, d))
+
+    def generate_maze_prims(self, seed: int = None) -> list[list[int]]:
+        if seed is None:
+            seed = random.randrange(sys.maxsize)
+        random.seed(seed)
+        grid = self.create_grid()
+        pattern_cells = set()
+        if self.can_show_pattern():
+            pattern_cells = self.pattern42()
+        visited = {(self.entry[0], self.entry[1])}
+        walls = []
+        self.wall_to_list(self.entry[0], self.entry[1], walls, visited, pattern_cells)
+
+        while walls:
+            wall_idx = random.randint(0, len(walls) - 1)
+            c1_x, c1_y, c2_x, c2_y, direction = walls.pop(wall_idx)
+            if (c2_x, c2_y) not in visited:
+                if not self.square_3x3(grid, c2_x, c2_y, visited):
+                    self.remove_wall(grid, c1_x, c1_y, direction)
+                    visited.add((c2_x, c2_y))
+                    self.wall_to_list(c2_x, c2_y, walls, visited, pattern_cells)
+        return grid
+
+    def find(self, cell: tuple, parent: dict) -> tuple:
+        root = cell
+        while parent[root] != root:
+            root = parent[root]
+        curr = cell
+        while parent[curr] != root:
+            n_node = parent[curr]
+            parent[curr] = root
+            curr = n_node
+        return root
+
+    def union(self, cell1: tuple, cell2: tuple, parent: dict) -> bool:
+        root1 = self.find(cell1, parent)
+        root2 = self.find(cell2, parent)
+        if root1 != root2:
+            parent[root1] = root2
+            return True
+        return False
+
+    def generate_maze_kruskal(self, seed: int = None) -> list[list[int]]:
+        if seed is None:
+            seed = random.randrange(sys.maxsize)
+        random.seed(seed)
+        grid = self.create_grid()
+        pattern_cells = set()
+        if self.can_show_pattern():
+            pattern_cells = self.pattern42()
+        parent = {(x, y): (x, y) for y in range(self.height + 1) for x in range(self.width + 1) if (x, y) not in pattern_cells}
+        walls = []
+        for y in range(self.height + 1):
+            for x in range(self.width + 1):
+                if (x, y) in pattern_cells:
+                    continue
+                for d in ["E", "S"]:
+                    nx, ny = x + DIRECTIONS[d]["dx"], y + DIRECTIONS[d]["dy"]
+                    if self.check_bounds(nx, ny) and (nx, ny) not in pattern_cells:
+                        walls.append((x, y, nx, ny, d))
+        
+        random.shuffle(walls)
+        for x1, y1, x2, y2, d in walls:
+            if self.find((x1, y1), parent) != self.find((x2, y2), parent):
+                if not self.square_3x3(grid, x2, y2):
+                    self.union((x1, y1), (x2, y2), parent)
+                    self.remove_wall(grid, x1, y1, d)
+        
+        return grid
+
     def generate_maze(self, seed: int = None) -> list[list[int]]:
         '''genera il maze, sia con perfect che non, utilizza DFS, avendo una lista di visitati formata da tuple di coordinate
         e poi ha uno variabile stack dalla quale toglie la cella solo se non ha celle vicine, quindi non visitate, fuori dai limiti e celle del pattern'''
