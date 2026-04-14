@@ -10,4 +10,4 @@ EXIT=15,12
 #Output filename
 OUTPUT_FILE=mazjhgfkjghe.txt
 #Is the name perfect?
-PERFECT=False
+PERFECT=True
