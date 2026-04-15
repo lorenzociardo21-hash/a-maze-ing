@@ -11,3 +11,5 @@ EXIT=15,12
 OUTPUT_FILE=mazjhgfkjghe.txt
 #Is the name perfect?
 PERFECT=True
+#Seed of generation
+SEED=None

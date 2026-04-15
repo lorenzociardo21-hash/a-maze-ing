@@ -34,6 +34,7 @@ class mazeconfig:
         self.exit: tuple[int, int] = (-1, -1)
         self.output_file: str = ""
         self.perfect = False
+        self.seed = None
 
         try:
             self.width = int(dati_estratti["WIDTH"])
@@ -44,6 +45,7 @@ class mazeconfig:
             self.exit = (int(x_parti[0]), int(x_parti[1]))
             self.output_file = dati_estratti["OUTPUT_FILE"]
             self.perfect = dati_estratti["PERFECT"] == "True"
+            self.seed = int(dati_estratti["SEED"])
             if self.entry[0] < 0 or self.entry[0] > self.width or \
                self.entry[1] < 0 or self.entry[1] > self.height:
                 print("Errore: L'entrata è fuori dal labirinto!")
@@ -56,7 +58,11 @@ class mazeconfig:
                 print("Errore: Entrata e uscita non possono essere nello stesso posto!")
             if self.width <= 0 or self.height <= 0:
                 print("Errore: Larghezza e altezza devono essere numeri positivi!")
-                sys.exit(1)     
+                sys.exit(1)
+            if self.seed < 0:
+                print("Errore: il seed non deve essere negativo!")
+                sys.exit(1)
+
         except KeyError as e:
             print(f"Errore: Manca la chiave obbligatoria {e}")
             sys.exit(1)
@@ -92,6 +98,7 @@ class MazeGenerator:
         self.entry: tuple = maze.entry
         self.exit: tuple = maze.exit
         self.perfect: bool = maze.perfect
+        self.seed: int = maze.seed
 
     def create_grid(self) -> list[list[int]]:
         '''ritorna una griglia piena di 15, quindi tutte mura'''
@@ -174,8 +181,11 @@ class MazeGenerator:
             if self.check_bounds(nx, ny) and (nx, ny) not in visited and (nx, ny) not in pattern_cells:
                 wall_list.append((x, y, nx, ny, d))
 
-    def generate_maze_prims(self, seed: int = None) -> list[list[int]]:
-        if seed is None:
+    def generate_maze_prims(self) -> list[list[int]]:
+        if self.entry in pattern_cells or self.exit in pattern_cells:
+            print("Errore: L'entrata o l'uscita cadono dentro il pattern 42!")
+            sys.exit(1)
+        if self.seed is None:
             seed = random.randrange(sys.maxsize)
         random.seed(seed)
         grid = self.create_grid()
@@ -194,7 +204,15 @@ class MazeGenerator:
                     self.remove_wall(grid, c1_x, c1_y, direction)
                     visited.add((c2_x, c2_y))
                     self.wall_to_list(c2_x, c2_y, walls, visited, pattern_cells)
-        return grid
+
+        if not self.perfect:
+            chosen_ones = self.get_remaining_walls(grid, pattern_cells, 0.15)
+            while chosen_ones:
+                x, y, d = chosen_ones[-1]
+                self.remove_wall(grid, x, y, d)
+                chosen_ones.pop()
+
+        return grid, seed
 
     def find(self, cell: tuple, parent: dict) -> tuple:
         root = cell
@@ -215,8 +233,11 @@ class MazeGenerator:
             return True
         return False
 
-    def generate_maze_kruskal(self, seed: int = None) -> list[list[int]]:
-        if seed is None:
+    def generate_maze_kruskal(self) -> list[list[int]]:
+        if self.entry in pattern_cells or self.exit in pattern_cells:
+            print("Errore: L'entrata o l'uscita cadono dentro il pattern 42!")
+            sys.exit(1)
+        if self.seed is None:
             seed = random.randrange(sys.maxsize)
         random.seed(seed)
         grid = self.create_grid()
@@ -239,13 +260,23 @@ class MazeGenerator:
             if self.find((x1, y1), parent) != self.find((x2, y2), parent):
                 self.union((x1, y1), (x2, y2), parent)
                 self.remove_wall(grid, x1, y1, d)
-        
-        return grid
 
-    def generate_maze(self, seed: int = None) -> list[list[int]]:
+        if not self.perfect:
+            chosen_ones = self.get_remaining_walls(grid, pattern_cells, 0.15)
+            while chosen_ones:
+                x, y, d = chosen_ones[-1]
+                self.remove_wall(grid, x, y, d)
+                chosen_ones.pop()
+
+        return grid, seed
+
+    def generate_maze(self) -> list[list[int]]:
         '''genera il maze, sia con perfect che non, utilizza DFS, avendo una lista di visitati formata da tuple di coordinate
         e poi ha uno variabile stack dalla quale toglie la cella solo se non ha celle vicine, quindi non visitate, fuori dai limiti e celle del pattern'''
-        if seed is None:
+        if self.entry in pattern_cells or self.exit in pattern_cells:
+            print("Errore: L'entrata o l'uscita cadono dentro il pattern 42!")
+            sys.exit(1)
+        if self.seed is None:
             seed = random.randrange(sys.maxsize)
         random.seed(seed)
         grid = self.create_grid()
@@ -277,11 +308,7 @@ class MazeGenerator:
                 self.remove_wall(grid, x, y, d)
                 chosen_ones.pop()
 
-        coords_vietate = self.pattern42()
-        if self.entry in coords_vietate or self.exit in coords_vietate:
-            print("Errore: L'entrata o l'uscita cadono dentro il pattern 42!")
-            sys.exit(1)
-        return grid
+        return grid, seed
 
 
 def get_neighbours(grid: list[list[int]], x: int, y: int, visited: set) -> list[tuple[int, int, str]]:
