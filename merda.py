@@ -415,6 +415,7 @@ def crea_pezzi_cella(valore_cella: int, x: int, y: int, settings: mazeconfig, pe
     sopra = MURO
     mezzo = ""
     sotto = MURO
+
     if valore_cella & 1: # il sopra
         sopra += MURO   # Chiudiamo il soffitto
     elif (x, y - 1) in percorso_coords and risolvi and (x, y) in percorso_coords:
@@ -422,7 +423,7 @@ def crea_pezzi_cella(valore_cella: int, x: int, y: int, settings: mazeconfig, pe
     else:
         sopra += VUOTO  # Lasciamo un buco
     sopra += MURO       # Chiudiamo l'angolo destro
-    # destra e sinistra  8 e 2
+
     if valore_cella & 8: # Muro a sinistra
         mezzo += MURO
     elif (x - 1, y) in percorso_coords and risolvi and (x, y) in percorso_coords:
@@ -549,6 +550,7 @@ def disegna_maze(griglia: list[list[int]], settings: mazeconfig, percorso: list[
             print(linea_sopra)
             print(linea_mezzo)
             print(linea_sotto)
+
         
 def output(griglia, soluzione, settings):
     esadecimale = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "A", "B", "C", "D", "E", "F"]
@@ -576,7 +578,10 @@ def main() -> None:
     config_path = sys.argv[1]
     settings = mazeconfig(config(config_path))
     maze = MazeGenerator(settings)
-    griglia = maze.generate_maze_kruskal()
+    loga = True
+    
+    listaalg = [maze.generate_maze_kruskal, maze.generate_maze_prims, maze.generate_maze]
+    griglia = listaalg[1]()
     soluzione = maze_res_mix_algo(maze, griglia)
     output(griglia, soluzione, settings)
     colore = ["\033[95m", "\033[97m", "\033[93m"]
@@ -589,11 +594,18 @@ def main() -> None:
             print("\n\033[91m1. Generare nuovo labirinto\033[0m")
             print("\033[95m2. Mostrate percorso\033[0m")
             print("\033[97m3. Cambiare colore\033[0m")
-            print("\033[93m4. Uscire\033[0m")
+            if loga is True:
+                print("\033[96m4. Algoritmo Krusckal! lo vuoi cambiare?\033[0m")
+            else:
+                print("\033[92m4. Algoritmo Prim! lo vuoi cambiare?\033[0m")
+            print("\033[93m5. Uscire\033[0m")
             scelta = input("\nscegliiiiii: ")
             if scelta == "1":
                 risolvi = False
-                griglia = maze.generate_maze_kruskal()
+                if loga is True:
+                   griglia = listaalg[1]()
+                else:
+                    griglia = listaalg[1]()
                 soluzione = maze_res_mix_algo(maze, griglia)
                 output(griglia, soluzione, settings)
             elif scelta == "2":
@@ -605,6 +617,8 @@ def main() -> None:
                     if quale in ["1", "2", "3", "4"]:
                         colore= sceltacolore(int(quale), colore)
             elif scelta == "4":
+                loga = not loga
+            elif scelta == "5":
                 print("Ciaoooo")
                 break
     except (KeyboardInterrupt, EOFError):
@@ -612,3 +626,4 @@ def main() -> None:
 
 
 main()
+

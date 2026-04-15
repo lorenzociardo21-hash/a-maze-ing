@@ -4,7 +4,7 @@ WIDTH=15
 HEIGHT=12
 
 #Entry coordinates (x, y)
-ENTRY=0, 0
+entry=0, 0
 #Exit coordinates (x, y)
 EXIT=15,12
 #Output filename
