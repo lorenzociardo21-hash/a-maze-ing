@@ -95,7 +95,7 @@ class MazeGenerator:
         self.entry: tuple = maze.entry
         self.exit: tuple = maze.exit
         self.perfect: bool = maze.perfect
-        self.seed: int = maze.seed
+        self.seed: str = maze.seed
 
     def create_grid(self) -> list[list[int]]:
         '''ritorna una griglia piena di 15, quindi tutte mura'''
@@ -179,17 +179,15 @@ class MazeGenerator:
                 wall_list.append((x, y, nx, ny, d))
 
     def generate_maze_prims(self) -> list[list[int]]:
-        if self.entry in pattern_cells or self.exit in pattern_cells:
-            print("Errore: L'entrata o l'uscita cadono dentro il pattern 42!")
-            sys.exit(1)
         try:
             seed = int(self.seed)
         except ValueError:
-            if self.seed is not None:
+            if self.seed == "None":
+                seed = random.randrange(sys.maxsize)
+            else:
                 print("Il seed non e' un numero! Ciao")
                 sys.exit(1)
-            seed = random.randrange(sys.maxsize)
-        if self.seed < 0:
+        if seed < 0:
             print("Errore: il seed non deve essere negativo!")
             sys.exit(1)
         random.seed(seed)
@@ -197,6 +195,9 @@ class MazeGenerator:
         pattern_cells = set()
         if self.can_show_pattern():
             pattern_cells = self.pattern42()
+        if self.entry in pattern_cells or self.exit in pattern_cells:
+            print("Errore: L'entrata o l'uscita cadono dentro il pattern 42!")
+            sys.exit(1)
         visited = {(self.entry[0], self.entry[1])}
         walls = []
         self.wall_to_list(self.entry[0], self.entry[1], walls, visited, pattern_cells)
@@ -239,17 +240,15 @@ class MazeGenerator:
         return False
 
     def generate_maze_kruskal(self) -> list[list[int]]:
-        if self.entry in pattern_cells or self.exit in pattern_cells:
-            print("Errore: L'entrata o l'uscita cadono dentro il pattern 42!")
-            sys.exit(1)
         try:
             seed = int(self.seed)
         except ValueError:
-            if self.seed is not None:
+            if self.seed == "None":
+                seed = random.randrange(sys.maxsize)
+            else:
                 print("Il seed non e' un numero! Ciao")
                 sys.exit(1)
-            seed = random.randrange(sys.maxsize)
-        if self.seed < 0:
+        if seed < 0:
             print("Errore: il seed non deve essere negativo!")
             sys.exit(1)
         random.seed(seed)
@@ -257,6 +256,9 @@ class MazeGenerator:
         pattern_cells = set()
         if self.can_show_pattern():
             pattern_cells = self.pattern42()
+        if self.entry in pattern_cells or self.exit in pattern_cells:
+            print("Errore: L'entrata o l'uscita cadono dentro il pattern 42!")
+            sys.exit(1)
         parent = {(x, y): (x, y) for y in range(self.height + 1) for x in range(self.width + 1) if (x, y) not in pattern_cells}
         walls = []
         for y in range(self.height + 1):
@@ -286,17 +288,15 @@ class MazeGenerator:
     def generate_maze(self) -> list[list[int]]:
         '''genera il maze, sia con perfect che non, utilizza DFS, avendo una lista di visitati formata da tuple di coordinate
         e poi ha uno variabile stack dalla quale toglie la cella solo se non ha celle vicine, quindi non visitate, fuori dai limiti e celle del pattern'''
-        if self.entry in pattern_cells or self.exit in pattern_cells:
-            print("Errore: L'entrata o l'uscita cadono dentro il pattern 42!")
-            sys.exit(1)
         try:
             seed = int(self.seed)
         except ValueError:
-            if self.seed is not None:
+            if self.seed == "None":
+                seed = random.andrange(sys.maxsize)
+            else:
                 print("Il seed non e' un numero! Ciao")
                 sys.exit(1)
-            seed = random.randrange(sys.maxsize)
-        if self.seed < 0:
+        if seed < 0:
             print("Errore: il seed non deve essere negativo!")
             sys.exit(1)
         random.seed(seed)
@@ -304,6 +304,9 @@ class MazeGenerator:
         pattern_cells = set()
         if self.can_show_pattern():
             pattern_cells = self.pattern42()
+        if self.entry in pattern_cells or self.exit in pattern_cells:
+            print("Errore: L'entrata o l'uscita cadono dentro il pattern 42!")
+            sys.exit(1)
         visited = set()
         visited.add(self.entry)
         stack = [self.entry]
@@ -629,7 +632,7 @@ def main() -> None:
     loga = True
     
     listaalg = [maze.generate_maze_kruskal, maze.generate_maze_prims, maze.generate_maze]
-    griglia = listaalg[1]()
+    griglia, seed = listaalg[1]()
     soluzione = maze_res_mix_algo(maze, griglia)
     output(griglia, soluzione, settings)
     colore = ["\033[95m", "\033[97m", "\033[93m"]
@@ -643,7 +646,7 @@ def main() -> None:
             print("\033[95m2. Mostrate percorso\033[0m")
             print("\033[97m3. Cambiare colore\033[0m")
             if loga is True:
-                print("\033[96m4. Algoritmo Krusckal! lo vuoi cambiare?\033[0m")
+                print("\033[96m4. Algoritmo Kruskal! lo vuoi cambiare?\033[0m")
             else:
                 print("\033[92m4. Algoritmo Prim! lo vuoi cambiare?\033[0m")
             print("\033[93m5. Uscire\033[0m")
@@ -651,9 +654,9 @@ def main() -> None:
             if scelta == "1":
                 risolvi = False
                 if loga is True:
-                   griglia = listaalg[1]()
+                   griglia, seed = listaalg[1]()
                 else:
-                    griglia = listaalg[1]()
+                    griglia, seed = listaalg[1]()
                 soluzione = maze_res_mix_algo(maze, griglia)
                 output(griglia, soluzione, settings)
             elif scelta == "2":
