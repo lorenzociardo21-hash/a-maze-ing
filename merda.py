@@ -185,7 +185,12 @@ class MazeGenerator:
         if self.entry in pattern_cells or self.exit in pattern_cells:
             print("Errore: L'entrata o l'uscita cadono dentro il pattern 42!")
             sys.exit(1)
-        if self.seed is None:
+        try:
+            seed = int(self.seed)
+        except ValueError:
+            if self.seed is not None:
+                print("Il seed non e' un numero! Ciao")
+                sys.exit(1)
             seed = random.randrange(sys.maxsize)
         random.seed(seed)
         grid = self.create_grid()
@@ -237,7 +242,12 @@ class MazeGenerator:
         if self.entry in pattern_cells or self.exit in pattern_cells:
             print("Errore: L'entrata o l'uscita cadono dentro il pattern 42!")
             sys.exit(1)
-        if self.seed is None:
+        try:
+            seed = int(self.seed)
+        except ValueError:
+            if self.seed is not None:
+                print("Il seed non e' un numero! Ciao")
+                sys.exit(1)
             seed = random.randrange(sys.maxsize)
         random.seed(seed)
         grid = self.create_grid()
@@ -276,7 +286,12 @@ class MazeGenerator:
         if self.entry in pattern_cells or self.exit in pattern_cells:
             print("Errore: L'entrata o l'uscita cadono dentro il pattern 42!")
             sys.exit(1)
-        if self.seed is None:
+        try:
+            seed = int(self.seed)
+        except ValueError:
+            if self.seed is not None:
+                print("Il seed non e' un numero! Ciao")
+                sys.exit(1)
             seed = random.randrange(sys.maxsize)
         random.seed(seed)
         grid = self.create_grid()
