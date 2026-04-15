@@ -450,6 +450,63 @@ def maze_res_mix_algo(maze: MazeGenerator, grid: list[list[int]]) -> list[tuple[
 
     return stack
 
+def change_config(file: str, change_settings: str, settings: mazeconfig) -> int:
+    try:
+        key, value = change_settings.split("=", 1)
+        value = value.strip()
+        if key.upper() == "WIDTH" or key.upper() == "HEIGHT":
+            width = int(value)
+            if width <= 0:
+                print("Errore: Larghezza e altezza devono essere numeri positivi! stronzo")
+                time.sleep(1)
+                return 0
+            if key.upper() == "WIDTH":
+                if width < settings.entry[0] or width < settings.exit[0]:
+                    return 1
+            if key.upper() == "HEIGHT":
+                if width < settings.entry[1] or width < settings.exit[1]:
+                    return 1
+        if key.upper() == "ENTRY" or key.upper() == "EXIT":
+            values = value.split(",")
+            entry = (int(values[0]), int(values[1]))
+            if entry[0] < 0 or entry[0] > settings.width or \
+                entry[1] < 0 or entry[1] > settings.height:
+                print("Errore: L'entrata è fuori dal labirinto!")
+                time.sleep(1)
+                return 0
+            if entry == settings.exit or entry == settings.entry:
+                print("Errore: Entrata e uscita non possono essere nello stesso posto!")
+                time.sleep(1)
+                return 0
+        if key.upper() == "PERFECT":
+            if value.capitalize() not in ["True", "False"]:
+                return 0
+        if key.upper() == "SEED":
+            values = int(value)
+            if values < 0:
+                return 0
+    except KeyError as e:
+        print(f"Errore: Manca la chiave obbligatoria {e}")
+        time.sleep(1)
+        return 0
+    except ValueError:
+        print("Errore: Hai scritto una parola dove volevo un numero!")
+        time.sleep(1)
+        return 0
+    except Exception as e:
+        print(f"Errore: {e}")
+        time.sleep(1)
+        return 0
+    lines = []
+    with open(file, 'r') as f:
+        lines = f.readlines()
+    for i, line in enumerate(lines):
+        if not line.startswith("#") and "=" in line and line.find(key) != -1:
+            line = line[:line.find("=") + 1] + value + "\n"
+            lines[i] = line
+    with open(file, 'w') as f:
+        f.writelines(lines)
+    return 1
 
 def crea_pezzi_cella(valore_cella: int, x: int, y: int, settings: mazeconfig, percorso_coords: list[tuple[int, int]], risolvi: bool, colore: str) -> tuple[str, str, str]:
     RESET = "\033[0m"
@@ -649,7 +706,7 @@ def main() -> None:
             print("\033[93m7. Uscire\033[0m")
             scelta = input("\nscegliiiiii: ")
             if scelta == "1":
-                if settings.seed is not "None":
+                if settings.seed != "None":
                     print("Non puoi generarlooo! hai impostato il seed!\nMetti il seed a None!!!")
                     time.sleep(4)
                 griglia, seed = listaalg[indicealg]()
@@ -671,24 +728,24 @@ def main() -> None:
             elif scelta == "5":
                 input(f"Eccolooooo:\n{seed}\n\nPremi qualcoa e invio per continuare!")
             elif scelta == "6":
-                print(f"\033[97m1. WDTH:{settings.width}\033[0m")
+                print(f"\033[97m1. WIDTH:{settings.width}\033[0m")
                 print(f"\033[97m2. HEIGHT:{settings.height}\033[0m")
                 print(f"\033[97m3. ENTRY:{settings.entry}\033[0m")
-                print(f"\033[97m5. EXIT:{settings.exit}\033[0m")
-                print(f"\033[97m4. OUTPUT_FILE Name:{settings.output_file}\033[0m")
-                print(f"\033[97m5. PERFECT:{settings.perfect}\033[0m")
-                print(f"\033[97m6. SEED:{settings.seed}\033[0m")
+                print(f"\033[97m4. EXIT:{settings.exit}\033[0m")
+                print(f"\033[97m5. OUTPUT_FILE Name:{settings.output_file}\033[0m")
+                print(f"\033[97m6. PERFECT:{settings.perfect}\033[0m")
+                print(f"\033[97m7. SEED:{settings.seed}\033[0m")
                 sceltaimp= input("\nscegli quello che vuoi cambiare!!")
-                if sceltaimp in ["1", "2", "3", "4", "5", "6"]:
-                    impostazioni = ["WDTH=", "HEIGHT=", "ENTRY=", "EXIT=",
+                if sceltaimp in ["1", "2", "3", "4", "5", "6", "7"]:
+                    impostazioni = ["WIDTH=", "HEIGHT=", "ENTRY=", "EXIT=",
                                     "OUTPUT_FILE=", "PERFECT=", "SEED="]
                     nuovo_valore = impostazioni[int(sceltaimp) - 1] + input("Cambia il valore!")
                     change_config(sys.argv[1], nuovo_valore, settings)
-                    if change_config == 0:
-                        main()
-                    else:
+                    if not change_config:
                         print("hai sbagliato a scriverleee!!")
                         time.sleep(4)
+                    else:
+                        return main()
 
             elif scelta == "7":
                 print("Ciaoooo")
