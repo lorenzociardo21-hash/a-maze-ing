@@ -45,7 +45,7 @@ class mazeconfig:
             self.exit = (int(x_parti[0]), int(x_parti[1]))
             self.output_file = dati_estratti["OUTPUT_FILE"]
             self.perfect = dati_estratti["PERFECT"] == "True"
-            self.seed = int(dati_estratti["SEED"])
+            self.seed = dati_estratti["SEED"]
             if self.entry[0] < 0 or self.entry[0] > self.width or \
                self.entry[1] < 0 or self.entry[1] > self.height:
                 print("Errore: L'entrata è fuori dal labirinto!")
@@ -58,9 +58,6 @@ class mazeconfig:
                 print("Errore: Entrata e uscita non possono essere nello stesso posto!")
             if self.width <= 0 or self.height <= 0:
                 print("Errore: Larghezza e altezza devono essere numeri positivi!")
-                sys.exit(1)
-            if self.seed < 0:
-                print("Errore: il seed non deve essere negativo!")
                 sys.exit(1)
 
         except KeyError as e:
@@ -192,6 +189,9 @@ class MazeGenerator:
                 print("Il seed non e' un numero! Ciao")
                 sys.exit(1)
             seed = random.randrange(sys.maxsize)
+        if self.seed < 0:
+            print("Errore: il seed non deve essere negativo!")
+            sys.exit(1)
         random.seed(seed)
         grid = self.create_grid()
         pattern_cells = set()
@@ -249,6 +249,9 @@ class MazeGenerator:
                 print("Il seed non e' un numero! Ciao")
                 sys.exit(1)
             seed = random.randrange(sys.maxsize)
+        if self.seed < 0:
+            print("Errore: il seed non deve essere negativo!")
+            sys.exit(1)
         random.seed(seed)
         grid = self.create_grid()
         pattern_cells = set()
@@ -293,6 +296,9 @@ class MazeGenerator:
                 print("Il seed non e' un numero! Ciao")
                 sys.exit(1)
             seed = random.randrange(sys.maxsize)
+        if self.seed < 0:
+            print("Errore: il seed non deve essere negativo!")
+            sys.exit(1)
         random.seed(seed)
         grid = self.create_grid()
         pattern_cells = set()
