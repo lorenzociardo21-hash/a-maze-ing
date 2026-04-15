@@ -292,7 +292,7 @@ class MazeGenerator:
             seed = int(self.seed)
         except ValueError:
             if self.seed == "None":
-                seed = random.andrange(sys.maxsize)
+                seed = random.randrange(sys.maxsize)
             else:
                 print("Il seed non e' un numero! Ciao")
                 sys.exit(1)
@@ -626,13 +626,11 @@ def main() -> None:
         print("Errore: Numero di argomenti sbagliato.")
         print("Usare: python3 a_maze_ing.py <config_file>")
         sys.exit(1)
-    config_path = sys.argv[1]
-    settings = mazeconfig(config(config_path))
+    settings = mazeconfig(config(sys.argv[1]))
     maze = MazeGenerator(settings)
-    loga = True
-    
+    indicealg = 0
     listaalg = [maze.generate_maze_kruskal, maze.generate_maze_prims, maze.generate_maze]
-    griglia, seed = listaalg[1]()
+    griglia, seed = listaalg[indicealg]()
     soluzione = maze_res_mix_algo(maze, griglia)
     output(griglia, soluzione, settings)
     colore = ["\033[95m", "\033[97m", "\033[93m"]
@@ -645,18 +643,16 @@ def main() -> None:
             print("\n\033[91m1. Generare nuovo labirinto\033[0m")
             print("\033[95m2. Mostrate percorso\033[0m")
             print("\033[97m3. Cambiare colore\033[0m")
-            if loga is True:
-                print("\033[96m4. Algoritmo Kruskal! lo vuoi cambiare?\033[0m")
-            else:
-                print("\033[92m4. Algoritmo Prim! lo vuoi cambiare?\033[0m")
-            print("\033[93m5. Uscire\033[0m")
+            print("\033[97m4. Cambia algoritmo\033[0m")
+            print("\033[97m5. Vuoi il seed????\033[0m")
+            print("\033[97m6. Scegli le TUE impostazioni!\033[0m")
+            print("\033[93m7. Uscire\033[0m")
             scelta = input("\nscegliiiiii: ")
             if scelta == "1":
-                risolvi = False
-                if loga is True:
-                   griglia, seed = listaalg[1]()
-                else:
-                    griglia, seed = listaalg[1]()
+                if settings.seed is not "None":
+                    print("Non puoi generarlooo! hai impostato il seed!\nMetti il seed a None!!!")
+                    time.sleep(4)
+                griglia, seed = listaalg[indicealg]()
                 soluzione = maze_res_mix_algo(maze, griglia)
                 output(griglia, soluzione, settings)
             elif scelta == "2":
@@ -668,8 +664,33 @@ def main() -> None:
                     if quale in ["1", "2", "3", "4"]:
                         colore= sceltacolore(int(quale), colore)
             elif scelta == "4":
-                loga = not loga
+                print("1. Kruskal | 2. Prims | 3. DFS")
+                alg = input("Scegli un algoritmo!!! ")
+                if alg in ["1", "2", "3"]:
+                    indicealg = int(alg) - 1
             elif scelta == "5":
+                input(f"Eccolooooo:\n{seed}\n\nPremi qualcoa e invio per continuare!")
+            elif scelta == "6":
+                print(f"\033[97m1. WDTH:{settings.width}\033[0m")
+                print(f"\033[97m2. HEIGHT:{settings.height}\033[0m")
+                print(f"\033[97m3. ENTRY:{settings.entry}\033[0m")
+                print(f"\033[97m5. EXIT:{settings.exit}\033[0m")
+                print(f"\033[97m4. OUTPUT_FILE Name:{settings.output_file}\033[0m")
+                print(f"\033[97m5. PERFECT:{settings.perfect}\033[0m")
+                print(f"\033[97m6. SEED:{settings.seed}\033[0m")
+                sceltaimp= input("\nscegli quello che vuoi cambiare!!")
+                if sceltaimp in ["1", "2", "3", "4", "5", "6"]:
+                    impostazioni = ["WDTH=", "HEIGHT=", "ENTRY=", "EXIT=",
+                                    "OUTPUT_FILE=", "PERFECT=", "SEED="]
+                    nuovo_valore = impostazioni[int(sceltaimp) - 1] + input("Cambia il valore!")
+                    change_config(sys.argv[1], nuovo_valore, settings)
+                    if change_config == 0:
+                        main()
+                    else:
+                        print("hai sbagliato a scriverleee!!")
+                        time.sleep(4)
+
+            elif scelta == "7":
                 print("Ciaoooo")
                 break
     except (KeyboardInterrupt, EOFError):
