@@ -45,7 +45,7 @@ class mazeconfig:
             self.exit = (int(x_parti[0]), int(x_parti[1]))
             self.output_file = dati_estratti["OUTPUT_FILE"]
             self.perfect = dati_estratti["PERFECT"] == "True"
-            self.seed = dati_estratti["SEED"]
+            self.seed = dati_estratti["SEED"].capitalize()
             if self.entry[0] < 0 or self.entry[0] > self.width or \
                self.entry[1] < 0 or self.entry[1] > self.height:
                 print("Errore: L'entrata è fuori dal labirinto!")
@@ -462,9 +462,12 @@ def change_config(file: str, change_settings: str, settings: mazeconfig) -> int:
                 return 0
             if key.upper() == "WIDTH":
                 if width < settings.entry[0] or width < settings.exit[0]:
+                    print("Errore: DIOCANEEEEEEEEE")
+                    time.sleep(1)
                     return 1
             if key.upper() == "HEIGHT":
                 if width < settings.entry[1] or width < settings.exit[1]:
+                    time.sleep(1)
                     return 1
         if key.upper() == "ENTRY" or key.upper() == "EXIT":
             values = value.split(",")
@@ -482,9 +485,12 @@ def change_config(file: str, change_settings: str, settings: mazeconfig) -> int:
             if value.capitalize() not in ["True", "False"]:
                 return 0
         if key.upper() == "SEED":
-            values = int(value)
-            if values < 0:
-                return 0
+            if value.capitalize() == "None":
+                pass
+            else:
+                values = int(value)
+                if values < 0:
+                    return 0
     except KeyError as e:
         print(f"Errore: Manca la chiave obbligatoria {e}")
         time.sleep(1)

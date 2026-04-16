@@ -1,15 +1,15 @@
 #Maze width (number of cells)
-WIDTH=19
+WIDTH=20
 #Maze height
 HEIGHT=15
 
 #Entry coordinates (x, y)
-ENTRY=3,3
+ENTRY=0,0
 #Exit coordinates (x, y)
-EXIT=15,12
+EXIT=19,14
 #Output filename
-OUTPUT_FILE=False
+OUTPUT_FILE=maze.txt
 #Is the name perfect?
-PERFECT=True
+PERFECT=False
 #Seed of generation
-SEED=1
+SEED=3
