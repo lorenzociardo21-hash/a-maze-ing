@@ -2,6 +2,7 @@ import time
 import random
 from src.parser import mazeconfig
 
+
 def crea_pezzi_cella(valore_cella: int, x: int, y: int, settings: mazeconfig,
                      percorso_coords: list[tuple[int, int]],
                      risolvi: bool, colore: list[str]) -> tuple[str, str, str]:
@@ -162,6 +163,7 @@ def disegna_maze(griglia: list[list[int]], settings: mazeconfig,
             time.sleep(0.1)
 
     else:
+        print("\033[2J\033[H\033[3J", end="")
         printamazing()
         for y, riga_numeri in enumerate(griglia):
             linea_sopra = ""

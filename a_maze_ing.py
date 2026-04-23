@@ -4,16 +4,17 @@ from src.display import sceltacolore, printamazing, disegna_maze
 from src.exporter import output
 from src.parser import config, mazeconfig
 from src.settings import change_config
-from src.solver import  maze_res_mix_algo
+from src.solver import maze_res_mix_algo, maze_res_astar
 from maze_gen.generator import MazeGenerator
+
 
 def main() -> None:
     if len(sys.argv) != 2:
         print("Errore: Numero di argomenti sbagliato.")
         print("Usare: python3 a_maze_ing.py <config_file>")
         sys.exit(1)
-    settings = mazeconfig(config(sys.argv[1]))
-    maze = MazeGenerator(settings)
+    settings:mazeconfig = mazeconfig(config(sys.argv[1]))
+    maze:MazeGenerator = MazeGenerator(settings)
     indicealg = 0
     listaalg = [maze.generate_maze_kruskal, maze.generate_maze_prims,
                 maze.generate_maze_dfs]
@@ -21,8 +22,9 @@ def main() -> None:
     soluzione = maze_res_mix_algo(maze, griglia)
     output(griglia, soluzione, settings)
     colore = ["\033[95m", "\033[97m", "\033[93m"]
-    risolvi = False
+    risolvi: bool = False
     printamazing()
+    algsoluzione: bool = False
     try:
         while True:
             print("\033[2J\033[H\033[3J", end="")
@@ -33,15 +35,25 @@ def main() -> None:
             print("\033[97m4. Cambia algoritmo\033[0m")
             print("\033[97m5. Vuoi il seed????\033[0m")
             print("\033[97m6. Scegli le TUE impostazioni!\033[0m")
-            print("\033[93m7. Uscire\033[0m")
+            if not algsoluzione:
+                print("\033[97m7. Cambia algoritmo risoluzione! \
+ora stai usando: Lgreco\033[0m")
+            else:
+                print("\033[97m7. Cambia algoritmo risoluzione! \
+ora stai usando: Astar\033[0m")
+            print("\033[93m8. Uscire\033[0m")
             scelta = input("\nscegliiiiii: ")
             if scelta == "1":
+                risolvi = False
                 if settings.seed != "None":
                     print("Non puoi generarlooo! hai impostato il seed!\
 \nMetti il seed a None!!!")
                     time.sleep(4)
                 griglia, seed = listaalg[indicealg]()
-                soluzione = maze_res_mix_algo(maze, griglia)
+                if not algsoluzione:
+                    soluzione = maze_res_mix_algo(maze, griglia)
+                else:
+                    soluzione = maze_res_astar(maze, griglia)
                 output(griglia, soluzione, settings)
             elif scelta == "2":
                 risolvi = not risolvi
@@ -53,14 +65,17 @@ def main() -> None:
                 if quale in ["1", "2", "3", "4"]:
                     colore = sceltacolore(int(quale), colore)
             elif scelta == "4":
+                risolvi = False
                 print("1. Kruskal | 2. Prims | 3. DFS")
                 alg = input("Scegli un algoritmo!!! ")
                 if alg in ["1", "2", "3"]:
                     indicealg = int(alg) - 1
             elif scelta == "5":
+                risolvi = False
                 input(f"Eccolooooo:\n{seed}\n\
 \nPremi qualcoa e invio per continuare!")
             elif scelta == "6":
+                risolvi = False
                 print(f"\033[97m1. WIDTH:{settings.width}\033[0m")
                 print(f"\033[97m2. HEIGHT:{settings.height}\033[0m")
                 print(f"\033[97m3. ENTRY:{settings.entry}\033[0m")
@@ -81,8 +96,17 @@ Name:{settings.output_file}\033[0m")
                         time.sleep(4)
                     else:
                         return main()
-
             elif scelta == "7":
+                risolvi = False
+                print("1. Lgreco algoritm | 2. Astar algoritm")
+                sceltariso: str = input("scegliii")
+                if sceltariso == "1":
+                    algsoluzione = False
+                elif sceltariso == "2":
+                    algsoluzione = True
+
+            elif scelta == "8":
+                risolvi = False
                 print("Ciaoooo")
                 break
     except (KeyboardInterrupt, EOFError):
@@ -91,3 +115,4 @@ Name:{settings.output_file}\033[0m")
 
 if __name__ == "__main__":
     main()
+

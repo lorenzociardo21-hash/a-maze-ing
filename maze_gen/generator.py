@@ -1,5 +1,6 @@
 import sys
 import random
+from src.parser import mazeconfig
 
 DIRECTIONS = {
     "N": {"num": 1, "opposite": "S", "dx": 0, "dy": - 1},
@@ -9,22 +10,35 @@ DIRECTIONS = {
 }
 
 
+PATTERN_42 = [
+    (0, 0), (0, 1), (0, 2), (1, 2), (2, 2), (2, 3), (2, 4),  # 4
+    (4, 0), (5, 0), (6, 0), (6, 1), (6, 2), (5, 2), (4, 2), (4, 3),
+    (4, 4), (5, 4), (6, 4),  # 2
+]
+
+
 class MazeGenerator:
-    def __init__(self, maze) -> None:
+    """Gestisce la generazione della struttura del labirinto."""
+    def __init__(self, maze: mazeconfig) -> None:
         self.width: int = maze.width
         self.height: int = maze.height
-        self.entry: tuple = maze.entry
-        self.exit: tuple = maze.exit
+        self.entry: tuple[int, int] = maze.entry
+        self.exit: tuple[int, int] = maze.exit
         self.perfect: bool = maze.perfect
-        self.seed: str = maze.seed
-        self.pattern_cells: set = maze.pattern_cells
+        self.seed: str | None = maze.seed
 
     def create_grid(self) -> list[list[int]]:
         '''ritorna una griglia piena di 15, quindi tutte mura'''
         return [[15 for _ in range(self.width + 1)]
                 for _ in range(self.height + 1)]
 
-    def check_bounds(self, x: int, y: int):
+    def pattern42(self) -> set[tuple[int, int]]:
+        center_x = self.width // 2 - 3
+        center_y = self.height // 2 - 2
+        return {(center_x + dx, center_y + dy) for dx, dy in PATTERN_42}
+
+    def check_bounds(self, x: int, y: int) -> bool:
+        """Verifica che la cella sia dentro i limiti."""
         return 0 <= x <= self.width and 0 <= y <= self.height
 
     def remove_wall(self, grid: list[list[int]],
@@ -32,8 +46,10 @@ class MazeGenerator:
                     y: int, direction: str) -> None:
         '''rimuove i muri rifacendosi al dizionario, dove e'
         presente la direzione, l'opposto e il numero con cui confrontare'''
-        neighbour_x = x + DIRECTIONS[direction]["dx"]
-        neighbour_y = y + DIRECTIONS[direction]["dy"]
+        a: int = DIRECTIONS[direction]["dx"]
+        b: int = DIRECTIONS[direction]["dy"]
+        neighbour_x = x + a
+        neighbour_y = y + b
         opposite = DIRECTIONS[direction]["opposite"]
 
         grid[y][x] &= ~DIRECTIONS[direction]["num"]
@@ -167,7 +183,7 @@ class MazeGenerator:
             return True
         return False
 
-    def generate_maze_kruskal(self) -> list[list[int]]:
+    def generate_maze_kruskal(self) -> tuple[list[list[int]], int]:
         try:
             seed = int(self.seed)
         except ValueError:
