@@ -20,6 +20,7 @@ essere numeri positivi!")
                     return 1
             if key.upper() == "HEIGHT":
                 if width < settings.entry[1] or width < settings.exit[1]:
+                    print("Errore: L'altezza non può essere più piccola dell'entrata o dell'uscita")
                     time.sleep(1)
                     return 1
         if key.upper() == "ENTRY" or key.upper() == "EXIT":
@@ -35,8 +36,14 @@ essere numeri positivi!")
 nello stesso posto!")
                 time.sleep(1)
                 return 0
+            if entry in settings.pattern_cells:
+                print("Errore: L'entrata o l'uscita cadono dentro il pattern 42!")
+                time.sleep(1)
+                return 0
         if key.upper() == "PERFECT":
             if value.capitalize() not in ["True", "False"]:
+                print("Errore: ammessi solo True o False per l'impostazione Perfect!")
+                time.sleep(1)
                 return 0
         if key.upper() == "SEED":
             if value.capitalize() == "None":
@@ -44,6 +51,8 @@ nello stesso posto!")
             else:
                 values = int(value)
                 if values < 0:
+                    print("Errore: il seed è negativo")
+                    time.sleep(1)
                     return 0
     except KeyError as e:
         print(f"Errore: Manca la chiave obbligatoria {e}")

@@ -1,5 +1,22 @@
 import sys
 
+
+PATTERN_42 = [
+    (0, 0), (0, 1), (0, 2), (1, 2), (2, 2), (2, 3), (2, 4),  # 4
+    (4, 0), (5, 0), (6, 0), (6, 1), (6, 2), (5, 2), (4, 2), (4, 3),
+    (4, 4), (5, 4), (6, 4),  # 2
+]
+
+def pattern42(width: int, height: int) -> set[tuple[int, int]]:
+    center_x = width // 2 - 3
+    center_y = height // 2 - 2
+    return {(center_x + dx, center_y + dy) for dx, dy in PATTERN_42}
+
+
+def can_show_pattern(width: int, height: int) -> bool:
+    return width >= 10 and height >= 7
+
+
 def config(namefile: str) -> dict[str, str]:
 
     dati_estratti: dict[str, str] = {}
@@ -35,6 +52,7 @@ class mazeconfig:
         self.output_file: str = ""
         self.perfect = False
         self.seed = None
+        self.pattern_cells = set()
 
         try:
             self.width = int(dati_estratti["WIDTH"])
@@ -46,6 +64,11 @@ class mazeconfig:
             self.output_file = dati_estratti["OUTPUT_FILE"]
             self.perfect = dati_estratti["PERFECT"] == "True"
             self.seed = dati_estratti["SEED"].capitalize()
+            if can_show_pattern(self.width, self.height):
+                self.pattern_cells = pattern42(self.width, self.height)
+            if self.entry in self.pattern_cells or self.exit in self.pattern_cells:
+                print("Errore: L'entrata o l'uscita cadono dentro il pattern 42!")
+                sys.exit(1)
             if self.entry[0] < 0 or self.entry[0] > self.width or \
                self.entry[1] < 0 or self.entry[1] > self.height:
                 print("Errore: L'entrata è fuori dal labirinto!")

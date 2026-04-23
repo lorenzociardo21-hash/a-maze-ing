@@ -9,12 +9,6 @@ DIRECTIONS = {
 }
 
 
-PATTERN_42 = [
-    (0, 0), (0, 1), (0, 2), (1, 2), (2, 2), (2, 3), (2, 4),  # 4
-    (4, 0), (5, 0), (6, 0), (6, 1), (6, 2), (5, 2), (4, 2), (4, 3),
-    (4, 4), (5, 4), (6, 4),  # 2
-]
-
 class MazeGenerator:
     def __init__(self, maze) -> None:
         self.width: int = maze.width
@@ -23,16 +17,12 @@ class MazeGenerator:
         self.exit: tuple = maze.exit
         self.perfect: bool = maze.perfect
         self.seed: str = maze.seed
+        self.pattern_cells: set = maze.pattern_cells
 
     def create_grid(self) -> list[list[int]]:
         '''ritorna una griglia piena di 15, quindi tutte mura'''
         return [[15 for _ in range(self.width + 1)]
                 for _ in range(self.height + 1)]
-
-    def pattern42(self) -> set[tuple[int, int]]:
-        center_x = self.width // 2 - 3
-        center_y = self.height // 2 - 2
-        return {(center_x + dx, center_y + dy) for dx, dy in PATTERN_42}
 
     def check_bounds(self, x: int, y: int):
         return 0 <= x <= self.width and 0 <= y <= self.height
@@ -86,9 +76,6 @@ class MazeGenerator:
                 neighbours.append((neighbour_x, neighbour_y, direction))
         return neighbours
 
-    def can_show_pattern(self) -> bool:
-        return self.width >= 10 and self.height >= 7
-
     def get_remaining_walls(self, grid: list[list[int]], pattern_cells: set,
                             percentage: float = 0.15) -> list[tuple]:
         '''viene usata per il non perfect maze, rende una lista celle,
@@ -137,16 +124,10 @@ class MazeGenerator:
             sys.exit(1)
         random.seed(seed)
         grid = self.create_grid()
-        pattern_cells = set()
-        if self.can_show_pattern():
-            pattern_cells = self.pattern42()
-        if self.entry in pattern_cells or self.exit in pattern_cells:
-            print("Errore: L'entrata o l'uscita cadono dentro il pattern 42!")
-            sys.exit(1)
         visited = {(self.entry[0], self.entry[1])}
         walls = []
         self.wall_to_list(self.entry[0], self.entry[1],
-                          walls, visited, pattern_cells)
+                          walls, visited, self.pattern_cells)
 
         while walls:
             wall_idx = random.randint(0, len(walls) - 1)
@@ -156,10 +137,10 @@ class MazeGenerator:
                     self.remove_wall(grid, c1_x, c1_y, direction)
                     visited.add((c2_x, c2_y))
                     self.wall_to_list(c2_x, c2_y, walls,
-                                      visited, pattern_cells)
+                                      visited, self.pattern_cells)
 
         if not self.perfect:
-            chosen_ones = self.get_remaining_walls(grid, pattern_cells, 0.15)
+            chosen_ones = self.get_remaining_walls(grid, self.pattern_cells, 0.15)
             while chosen_ones:
                 x, y, d = chosen_ones[-1]
                 self.remove_wall(grid, x, y, d)
@@ -200,24 +181,18 @@ class MazeGenerator:
             sys.exit(1)
         random.seed(seed)
         grid = self.create_grid()
-        pattern_cells = set()
-        if self.can_show_pattern():
-            pattern_cells = self.pattern42()
-        if self.entry in pattern_cells or self.exit in pattern_cells:
-            print("Errore: L'entrata o l'uscita cadono dentro il pattern 42!")
-            sys.exit(1)
         parent = {(x, y): (x, y) for y in range(self.height + 1)
                   for x in range(self.width + 1)
-                  if (x, y) not in pattern_cells}
+                  if (x, y) not in self.pattern_cells}
         walls = []
         for y in range(self.height + 1):
             for x in range(self.width + 1):
-                if (x, y) in pattern_cells:
+                if (x, y) in self.pattern_cells:
                     continue
                 for d in ["E", "S"]:
                     nx, ny = x + DIRECTIONS[d]["dx"], y + DIRECTIONS[d]["dy"]
                     if ((self.check_bounds(nx, ny)
-                         and (nx, ny) not in pattern_cells)):
+                         and (nx, ny) not in self.pattern_cells)):
                         walls.append((x, y, nx, ny, d))
 
         random.shuffle(walls)
@@ -227,7 +202,7 @@ class MazeGenerator:
                 self.remove_wall(grid, x1, y1, d)
 
         if not self.perfect:
-            chosen_ones = self.get_remaining_walls(grid, pattern_cells, 0.15)
+            chosen_ones = self.get_remaining_walls(grid, self.pattern_cells, 0.15)
             while chosen_ones:
                 x, y, d = chosen_ones[-1]
                 self.remove_wall(grid, x, y, d)
@@ -235,7 +210,7 @@ class MazeGenerator:
 
         return grid, seed
 
-    def generate_maze(self) -> list[list[int]]:
+    def generate_maze_dfs(self) -> list[list[int]]:
         '''genera il maze, sia con perfect che non, utilizza DFS,
         avendo una lista di visitati formata da tuple di coordinate
         e poi ha uno variabile stack dalla quale toglie la cella solo
@@ -254,12 +229,6 @@ class MazeGenerator:
             sys.exit(1)
         random.seed(seed)
         grid = self.create_grid()
-        pattern_cells = set()
-        if self.can_show_pattern():
-            pattern_cells = self.pattern42()
-        if self.entry in pattern_cells or self.exit in pattern_cells:
-            print("Errore: L'entrata o l'uscita cadono dentro il pattern 42!")
-            sys.exit(1)
         visited = set()
         visited.add(self.entry)
         stack = [self.entry]
@@ -269,7 +238,7 @@ class MazeGenerator:
             neighbours = [
                 (nx, ny, direction)
                 for nx, ny, direction
-                in self.unvisited_neighbours(x, y, pattern_cells, visited)
+                in self.unvisited_neighbours(x, y, self.pattern_cells, visited)
                 if not self.square_3x3(grid, nx, ny, visited)
             ]
 
@@ -281,7 +250,7 @@ class MazeGenerator:
             else:
                 stack.pop()
         if not self.perfect:
-            chosen_ones = self.get_remaining_walls(grid, pattern_cells, 0.15)
+            chosen_ones = self.get_remaining_walls(grid, self.pattern_cells, 0.15)
             while chosen_ones:
                 x, y, d = chosen_ones[-1]
                 self.remove_wall(grid, x, y, d)

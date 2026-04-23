@@ -16,7 +16,7 @@ def main() -> None:
     maze = MazeGenerator(settings)
     indicealg = 0
     listaalg = [maze.generate_maze_kruskal, maze.generate_maze_prims,
-                maze.generate_maze]
+                maze.generate_maze_dfs]
     griglia, seed = listaalg[indicealg]()
     soluzione = maze_res_mix_algo(maze, griglia)
     output(griglia, soluzione, settings)
@@ -48,7 +48,7 @@ def main() -> None:
             elif scelta == "3":
                 risolvi = False
                 print("1. Muri | 2. Corridoio | 3. 42 | \
-                        4. Scelta pazzerella")
+4. Scelta pazzerella")
                 quale = input("Quale parte vuoi cambiare? ")
                 if quale in ["1", "2", "3", "4"]:
                     colore = sceltacolore(int(quale), colore)
