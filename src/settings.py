@@ -41,14 +41,10 @@ def change_config(file: str, change_settings: str,
                 print("Errore: Entrata e uscita non possono coincidere!")
                 time.sleep(1)
                 return 0
-<<<<<<< HEAD
-            if entry in settings.pattern_cells:
+            if entry_coord in settings.pattern_cells:
                 print("Errore: L'entrata o l'uscita cadono dentro il pattern 42!")
                 time.sleep(1)
                 return 0
-=======
-
->>>>>>> 4b9b29d7546e90d0fe48454a0af18eea9f62598d
         if key.upper() == "PERFECT":
             if value.capitalize() not in ["True", "False"]:
                 print("Errore: ammessi solo True o False per l'impostazione Perfect!")
@@ -59,15 +55,10 @@ def change_config(file: str, change_settings: str,
             if value.capitalize() == "None":
                 pass
             else:
-<<<<<<< HEAD
-                values = int(value)
+                values: int = int(value)
                 if values < 0:
                     print("Errore: il seed è negativo")
                     time.sleep(1)
-=======
-                seed_val: int = int(value)
-                if seed_val < 0:
->>>>>>> 4b9b29d7546e90d0fe48454a0af18eea9f62598d
                     return 0
 
     except (KeyError, ValueError, Exception):

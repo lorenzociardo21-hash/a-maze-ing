@@ -37,7 +37,7 @@ def main() -> None:
             print("\033[97m6. Scegli le TUE impostazioni!\033[0m")
             if not algsoluzione:
                 print("\033[97m7. Cambia algoritmo risoluzione! \
-ora stai usando: Lgreco\033[0m")
+ora stai usando: Coglione\033[0m")
             else:
                 print("\033[97m7. Cambia algoritmo risoluzione! \
 ora stai usando: Astar\033[0m")
@@ -98,7 +98,7 @@ Name:{settings.output_file}\033[0m")
                         return main()
             elif scelta == "7":
                 risolvi = False
-                print("1. Lgreco algoritm | 2. Astar algoritm")
+                print("1. Coglione algoritm | 2. Astar algoritm")
                 sceltariso: str = input("scegliii")
                 if sceltariso == "1":
                     algsoluzione = False

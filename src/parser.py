@@ -1,12 +1,12 @@
 import sys
 
 
-<<<<<<< HEAD
 PATTERN_42 = [
     (0, 0), (0, 1), (0, 2), (1, 2), (2, 2), (2, 3), (2, 4),  # 4
     (4, 0), (5, 0), (6, 0), (6, 1), (6, 2), (5, 2), (4, 2), (4, 3),
     (4, 4), (5, 4), (6, 4),  # 2
 ]
+
 
 def pattern42(width: int, height: int) -> set[tuple[int, int]]:
     center_x = width // 2 - 3
@@ -18,8 +18,6 @@ def can_show_pattern(width: int, height: int) -> bool:
     return width >= 10 and height >= 7
 
 
-=======
->>>>>>> 4b9b29d7546e90d0fe48454a0af18eea9f62598d
 def config(namefile: str) -> dict[str, str]:
 
     dati_estratti: dict[str, str] = {}

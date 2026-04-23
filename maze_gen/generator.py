@@ -10,13 +10,6 @@ DIRECTIONS = {
 }
 
 
-PATTERN_42 = [
-    (0, 0), (0, 1), (0, 2), (1, 2), (2, 2), (2, 3), (2, 4),  # 4
-    (4, 0), (5, 0), (6, 0), (6, 1), (6, 2), (5, 2), (4, 2), (4, 3),
-    (4, 4), (5, 4), (6, 4),  # 2
-]
-
-
 class MazeGenerator:
     """Gestisce la generazione della struttura del labirinto."""
     def __init__(self, maze: mazeconfig) -> None:
@@ -26,16 +19,12 @@ class MazeGenerator:
         self.exit: tuple[int, int] = maze.exit
         self.perfect: bool = maze.perfect
         self.seed: str | None = maze.seed
+        self.pattern_cells: set = maze.pattern_cells
 
     def create_grid(self) -> list[list[int]]:
         '''ritorna una griglia piena di 15, quindi tutte mura'''
         return [[15 for _ in range(self.width + 1)]
                 for _ in range(self.height + 1)]
-
-    def pattern42(self) -> set[tuple[int, int]]:
-        center_x = self.width // 2 - 3
-        center_y = self.height // 2 - 2
-        return {(center_x + dx, center_y + dy) for dx, dy in PATTERN_42}
 
     def check_bounds(self, x: int, y: int) -> bool:
         """Verifica che la cella sia dentro i limiti."""
