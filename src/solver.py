@@ -1,5 +1,6 @@
 from maze_gen.generator import MazeGenerator, DIRECTIONS
 
+
 def get_neighbours(grid: list[list[int]], x: int, y: int,
                    visited: set) -> list[tuple[int, int, str]]:
     neighbours = []
@@ -11,13 +12,14 @@ def get_neighbours(grid: list[list[int]], x: int, y: int,
     return neighbours
 
 
-def distance(x1: int, y1: int, exit: tuple[int, int]) -> int:
-    return ((exit[0] - x1) ** 2 + (exit[1] - y1) ** 2) ** 0.5
+def distance(x1: int, y1: int, exit: tuple[int, int]) -> float:
+    a: float = ((exit[0] - x1) ** 2 + (exit[1] - y1) ** 2) ** 0.5
+    return a
 
 
 def find_dir(grid: list[list[int]], x: int, y: int, exit: tuple[int, int],
              visited: set) -> tuple[int, int, str]:
-    min_dist = 2**32
+    min_dist: int = 2**32
     min_x, min_y = x, y
     direction = None
     for direc, values in DIRECTIONS.items():

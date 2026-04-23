@@ -1,5 +1,6 @@
 import sys
 
+
 def config(namefile: str) -> dict[str, str]:
 
     dati_estratti: dict[str, str] = {}
