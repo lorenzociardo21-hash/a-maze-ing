@@ -10,6 +10,7 @@ from maze_gen.generator import MazeGenerator
 
 
 def main() -> None:
+    '''fa quello che fanno i main'''
     if len(sys.argv) != 2:
         print("Errore: Numero di argomenti sbagliato.")
         print("Usare: python3 a_maze_ing.py <config_file>")

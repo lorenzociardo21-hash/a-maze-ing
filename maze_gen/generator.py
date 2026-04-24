@@ -126,6 +126,7 @@ class MazeGenerator:
                      wall_list: list[tuple[int, int, int, int, str]],
                      visited: set[tuple[int, int]],
                      pattern_cells: set[tuple[int, int]]) -> None:
+        '''prende tutti i muri nella griglia '''
         for d, val in DIRECTIONS.items():
             nx, ny = x + val["dx"], y + val["dy"]
             if (self.check_bounds(nx, ny) and
@@ -134,6 +135,7 @@ class MazeGenerator:
                 wall_list.append((x, y, nx, ny, d))
 
     def generate_maze_prims(self) -> tuple[list[list[int]], int]:
+        ''' algorimo prim'''
         seed_val: int
         try:
             seed_val = int(self.seed)  # type: ignore[arg-type]
@@ -176,6 +178,7 @@ class MazeGenerator:
     def find(self, cell: tuple[int, int],
              parent: dict[tuple[int, int],
                           tuple[int, int]]) -> tuple[int, int]:
+        ''' cerca le celle che non sono nello stesso set'''
         root = cell
         while parent[root] != root:
             root = parent[root]
@@ -188,6 +191,7 @@ class MazeGenerator:
 
     def union(self, cell1: tuple[int, int], cell2: tuple[int, int],
               parent: dict[tuple[int, int], tuple[int, int]]) -> bool:
+        ''' unisce le celle nello stesso set'''
         root1 = self.find(cell1, parent)
         root2 = self.find(cell2, parent)
         if root1 != root2:
@@ -196,6 +200,7 @@ class MazeGenerator:
         return False
 
     def generate_maze_kruskal(self) -> tuple[list[list[int]], int]:
+        ''' kruskal's algorithm '''
         seed_val: int
         try:
             seed_val = int(self.seed)  # type: ignore[arg-type]

@@ -3,6 +3,7 @@ from typing import TypedDict
 
 
 class DirectionInfo(TypedDict):
+    '''classe per il type hint'''
     num: int
     opposite: str
     dx: int
@@ -12,6 +13,7 @@ class DirectionInfo(TypedDict):
 def get_neighbours(grid: list[list[int]], x: int, y: int,
                    visited: set[tuple[int,
                                       int]]) -> list[tuple[int, int, str]]:
+    ''' prende le celle linitrofe'''
     neighbours: list[tuple[int, int, str]] = []
     for direction, values in DIRECTIONS.items():
         if not grid[y][x] & values["num"]:
@@ -22,6 +24,7 @@ def get_neighbours(grid: list[list[int]], x: int, y: int,
 
 
 def distance(x1: int, y1: int, exit: tuple[int, int]) -> float:
+    ''' pitagoraa'''
     a: float = ((exit[0] - x1) ** 2 + (exit[1] - y1) ** 2) ** 0.5
     return a
 
@@ -29,6 +32,7 @@ def distance(x1: int, y1: int, exit: tuple[int, int]) -> float:
 def find_dir(grid: list[list[int]], x: int, y: int, exit: tuple[int, int],
              visited: set[tuple[int,
                                 int]]) -> tuple[float, int, int, str | None]:
+    ''' trova la direzione piu corta'''
     min_dist: float = float('inf')
     min_x, min_y = x, y
     direction: str | None = None
@@ -42,32 +46,11 @@ def find_dir(grid: list[list[int]], x: int, y: int, exit: tuple[int, int],
     return min_dist, min_x, min_y, direction
 
 
-def check_stack(grid: list[list[int]],
-                stack: list[tuple[int, int,
-                                  str]]) -> list[tuple[int, int, str]]:
-    changed = True
-    while changed:
-        changed = False
-        pos_index = {(x, y): i for i, (x, y, _) in enumerate(stack)}
-        for i, (x, y, _) in enumerate(stack):
-            for direc, val in DIRECTIONS.items():
-                dx, dy = x + val["dx"], y + val["dy"]
-                if (dx, dy) in pos_index:
-                    j = pos_index[(dx, dy)]
-                    if j > i + 1 and not grid[y][x] & val["num"]:
-                        stack = stack[:i + 1] + stack[j:]
-                        stack[i] = (x, y, direc)
-                        changed = True
-                        break
-            if changed:
-                break
-    return stack
-
-
 def check_distance(grid: list[list[int]],
                    neighbours: list[tuple[int, int, str]],
                    exit: tuple[int, int],
                    visited: set[tuple[int, int]]) -> tuple[int, int, str]:
+    ''' controlla la distanza minore tra i vicini'''
     min_x, min_y, direction_min = neighbours[0]
     min_ndist, _, _, _ = find_dir(grid, min_x, min_y, exit,
                                   visited | {(min_x, min_y)})
@@ -86,6 +69,7 @@ def check_distance(grid: list[list[int]],
 
 def maze_res_astar(maze: MazeGenerator,
                    grid: list[list[int]]) -> list[tuple[int, int, str | None]]:
+    ''' algoritmo A*'''
     start = maze.entry
     exit = maze.exit
     stack: list[tuple[float, int, int, int]] = [
@@ -127,6 +111,7 @@ def maze_res_astar(maze: MazeGenerator,
 def maze_res_mix_algo(maze: MazeGenerator,
                       grid: list[list[int]]) -> list[tuple[int,
                                                            int, str | None]]:
+    ''' algoritmo fatto in casa per voi, fa quello che fanno gli altri'''
     visited: set[tuple[int, int]] = set()
     stack: list[tuple[int, int, str]] = []
     current_x, current_y = maze.entry
@@ -161,6 +146,7 @@ def check_stack_none(grid: list[list[int]],
                                                                    int,
                                                                    str |
                                                                    None]]:
+    ''' corregge la soluzione finale'''
     changed = True
     while changed:
         changed = False

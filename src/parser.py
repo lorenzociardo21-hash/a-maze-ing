@@ -10,17 +10,19 @@ PATTERN_42 = [
 
 
 def pattern42(width: int, height: int) -> set[tuple[int, int]]:
+    '''calcola dove mettere il 42'''
     center_x = width // 2 - 3
     center_y = height // 2 - 2
     return {(center_x + dx, center_y + dy) for dx, dy in PATTERN_42}
 
 
 def can_show_pattern(width: int, height: int) -> bool:
+    '''controlla se c'e' posto per il 42'''
     return width >= 10 and height >= 7
 
 
 def config(namefile: str) -> dict[str, str]:
-
+    '''legge il file!'''
     dati_estratti: dict[str, str] = {}
     try:
         with open(namefile, 'r') as file_aperto:
@@ -46,6 +48,7 @@ def config(namefile: str) -> dict[str, str]:
 
 
 class mazeconfig:
+    ''' genere una classe con tutte le impostazini(tooop)'''
     def __init__(self, dati_estratti: dict[str, str]) -> None:
         self.width: int = -1
         self.height: int = -1

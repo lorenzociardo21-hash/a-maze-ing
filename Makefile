@@ -3,6 +3,7 @@ PYTHON = python3
 MAIN = a_maze_ing.py
 CONFIG = config.txt
 MYPY_FLAGS = --warn-return-any --warn-unused-ignores --ignore-missing-imports --disallow-untyped-defs --check-untyped-defs
+MYPY_STRICT = --strict 
 
 all: run
 
@@ -25,6 +26,10 @@ clean:
 lint:
 	flake8 .
 	mypy $(MYPY_FLAGS) .
+lint-strict:
+	flake8 .
+	mypy $(MYPY_STRICT) .
 
 
-.PHONY: all install run debug clean lint
+
+.PHONY: all install run debug clean lint lint_strict
