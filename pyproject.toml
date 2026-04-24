@@ -5,7 +5,8 @@ description = "Project to create random generation of a maze and use algorithm t
 authors = [
     {name = "lciardo, lgreco"}
 ]
-
+[project]
+readme = "README.md"
 requires-python = ">=3.10"
 [dependency-groups]
 standards = [
