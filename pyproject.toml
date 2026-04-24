@@ -1,0 +1,19 @@
+[project]
+name = "a-maze-ing"
+version = "0.1.0"
+description = "Project to create random generation of a maze and use algorithm to resolve it"
+authors = [
+    {name = "lciardo, lgreco"}
+]
+
+requires-python = ">=3.10"
+[dependency-groups]
+standards = [
+    "flake8",
+    "mypy",
+]
+
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
