@@ -1,12 +1,21 @@
 import sys
 import random
 from src.parser import mazeconfig
+from typing import TypedDict
 
-DIRECTIONS = {
-    "N": {"num": 1, "opposite": "S", "dx": 0, "dy": - 1},
+
+class DirectionInfo(TypedDict):
+    num: int
+    opposite: str
+    dx: int
+    dy: int
+
+
+DIRECTIONS: dict[str, DirectionInfo] = {
+    "N": {"num": 1, "opposite": "S", "dx": 0, "dy": -1},
     "S": {"num": 4, "opposite": "N", "dx": 0, "dy": 1},
     "E": {"num": 2, "opposite": "W", "dx": 1, "dy": 0},
-    "W": {"num": 8, "opposite": "E", "dx": - 1, "dy": 0},
+    "W": {"num": 8, "opposite": "E", "dx": -1, "dy": 0},
 }
 
 
@@ -19,7 +28,7 @@ class MazeGenerator:
         self.exit: tuple[int, int] = maze.exit
         self.perfect: bool = maze.perfect
         self.seed: str | None = maze.seed
-        self.pattern_cells: set = maze.pattern_cells
+        self.pattern_cells: set[tuple[int, int]] = maze.pattern_cells
 
     def create_grid(self) -> list[list[int]]:
         '''ritorna una griglia piena di 15, quindi tutte mura'''
@@ -45,7 +54,8 @@ class MazeGenerator:
         grid[neighbour_y][neighbour_x] &= ~DIRECTIONS[opposite]["num"]
 
     def square_3x3(self, grid: list[list[int]], nx: int,
-                   ny: int, visited: set = None) -> bool:
+                   ny: int,
+                   visited: set[tuple[int, int]] | None = None) -> bool:
         if visited is None:
             visited = set()
         '''Guarda se nei dinteorni della cella si forma un quadrato 3x3,
@@ -67,12 +77,16 @@ class MazeGenerator:
                     return True
         return False
 
-    def unvisited_neighbours(self, x: int, y: int, pattern_cells: set,
-                             visited: set) -> list[tuple[int, int, str]]:
+    def unvisited_neighbours(self, x: int, y: int,
+                             pattern_cells: set[tuple[int, int]],
+                             visited: set[tuple[int, int]]) -> list[tuple
+                                                                    [int,
+                                                                     int,
+                                                                     str]]:
         '''Guarda le celle nei dintorni della cella
         corrente paasatagli e rende una lista di esse,
         le quali non sono gia state visitate o non sono nel pattern42'''
-        neighbours = []
+        neighbours: list[tuple[int, int, str]] = []
         for direction, values in DIRECTIONS.items():
             neighbour_x, neighbour_y = x + values["dx"], y + values["dy"]
             if (self.check_bounds(neighbour_x, neighbour_y) and
@@ -81,14 +95,17 @@ class MazeGenerator:
                 neighbours.append((neighbour_x, neighbour_y, direction))
         return neighbours
 
-    def get_remaining_walls(self, grid: list[list[int]], pattern_cells: set,
-                            percentage: float = 0.15) -> list[tuple]:
+    def get_remaining_walls(self, grid: list[list[int]],
+                            pattern_cells: set[tuple[int, int]],
+                            percentage: float = 0.15) -> list[tuple[int,
+                                                                    int,
+                                                                    str]]:
         '''viene usata per il non perfect maze, rende una lista celle,
         che hanno dei muri, randomica e secondo una percentuale k,
         guarda solo se la cella ha muri ad est o sud, perche si muove
         da sinistra a destra e dall'alto verso il basso. Oltre ai classici
         controlli dei limiti e delle celle 42'''
-        walls = []
+        walls: list[tuple[int, int, str]] = []
         for row in range(self.height):
             for column in range(self.width):
                 if (column, row) not in pattern_cells:
@@ -107,7 +124,8 @@ class MazeGenerator:
 
     def wall_to_list(self, x: int, y: int,
                      wall_list: list[tuple[int, int, int, int, str]],
-                     visited: set, pattern_cells: set) -> None:
+                     visited: set[tuple[int, int]],
+                     pattern_cells: set[tuple[int, int]]) -> None:
         for d, val in DIRECTIONS.items():
             nx, ny = x + val["dx"], y + val["dy"]
             if (self.check_bounds(nx, ny) and
@@ -115,22 +133,23 @@ class MazeGenerator:
                  and (nx, ny) not in pattern_cells)):
                 wall_list.append((x, y, nx, ny, d))
 
-    def generate_maze_prims(self) -> list[list[int]]:
+    def generate_maze_prims(self) -> tuple[list[list[int]], int]:
+        seed_val: int
         try:
-            seed = int(self.seed)
+            seed_val = int(self.seed)  # type: ignore[arg-type]
         except ValueError:
             if self.seed == "None":
-                seed = random.randrange(sys.maxsize)
+                seed_val = random.randrange(sys.maxsize)
             else:
                 print("Il seed non e' un numero! Ciao")
                 sys.exit(1)
-        if seed < 0:
+        if seed_val < 0:
             print("Errore: il seed non deve essere negativo!")
             sys.exit(1)
-        random.seed(seed)
+        random.seed(seed_val)
         grid = self.create_grid()
-        visited = {(self.entry[0], self.entry[1])}
-        walls = []
+        visited: set[tuple[int, int]] = {(self.entry[0], self.entry[1])}
+        walls: list[tuple[int, int, int, int, str]] = []
         self.wall_to_list(self.entry[0], self.entry[1],
                           walls, visited, self.pattern_cells)
 
@@ -145,15 +164,18 @@ class MazeGenerator:
                                       visited, self.pattern_cells)
 
         if not self.perfect:
-            chosen_ones = self.get_remaining_walls(grid, self.pattern_cells, 0.15)
+            chosen_ones = self.get_remaining_walls(grid,
+                                                   self.pattern_cells, 0.15)
             while chosen_ones:
                 x, y, d = chosen_ones[-1]
                 self.remove_wall(grid, x, y, d)
                 chosen_ones.pop()
 
-        return grid, seed
+        return grid, seed_val
 
-    def find(self, cell: tuple, parent: dict) -> tuple:
+    def find(self, cell: tuple[int, int],
+             parent: dict[tuple[int, int],
+                          tuple[int, int]]) -> tuple[int, int]:
         root = cell
         while parent[root] != root:
             root = parent[root]
@@ -164,7 +186,8 @@ class MazeGenerator:
             curr = n_node
         return root
 
-    def union(self, cell1: tuple, cell2: tuple, parent: dict) -> bool:
+    def union(self, cell1: tuple[int, int], cell2: tuple[int, int],
+              parent: dict[tuple[int, int], tuple[int, int]]) -> bool:
         root1 = self.find(cell1, parent)
         root2 = self.find(cell2, parent)
         if root1 != root2:
@@ -173,23 +196,26 @@ class MazeGenerator:
         return False
 
     def generate_maze_kruskal(self) -> tuple[list[list[int]], int]:
+        seed_val: int
         try:
-            seed = int(self.seed)
+            seed_val = int(self.seed)  # type: ignore[arg-type]
         except ValueError:
             if self.seed == "None":
-                seed = random.randrange(sys.maxsize)
+                seed_val = random.randrange(sys.maxsize)
             else:
                 print("Il seed non e' un numero! Ciao")
                 sys.exit(1)
-        if seed < 0:
+        if seed_val < 0:
             print("Errore: il seed non deve essere negativo!")
             sys.exit(1)
-        random.seed(seed)
+        random.seed(seed_val)
         grid = self.create_grid()
-        parent = {(x, y): (x, y) for y in range(self.height + 1)
-                  for x in range(self.width + 1)
-                  if (x, y) not in self.pattern_cells}
-        walls = []
+        parent: dict[tuple[int, int], tuple[int, int]] = {
+            (x, y): (x, y) for y in range(self.height + 1)
+            for x in range(self.width + 1)
+            if (x, y) not in self.pattern_cells
+        }
+        walls: list[tuple[int, int, int, int, str]] = []
         for y in range(self.height + 1):
             for x in range(self.width + 1):
                 if (x, y) in self.pattern_cells:
@@ -207,36 +233,38 @@ class MazeGenerator:
                 self.remove_wall(grid, x1, y1, d)
 
         if not self.perfect:
-            chosen_ones = self.get_remaining_walls(grid, self.pattern_cells, 0.15)
+            chosen_ones = self.get_remaining_walls(grid,
+                                                   self.pattern_cells, 0.15)
             while chosen_ones:
                 x, y, d = chosen_ones[-1]
                 self.remove_wall(grid, x, y, d)
                 chosen_ones.pop()
 
-        return grid, seed
+        return grid, seed_val
 
-    def generate_maze_dfs(self) -> list[list[int]]:
+    def generate_maze_dfs(self) -> tuple[list[list[int]], int]:
         '''genera il maze, sia con perfect che non, utilizza DFS,
         avendo una lista di visitati formata da tuple di coordinate
         e poi ha uno variabile stack dalla quale toglie la cella solo
         se non ha celle vicine, quindi non visitate, fuori dai limiti
         e celle del pattern'''
+        seed_val: int
         try:
-            seed = int(self.seed)
+            seed_val = int(self.seed)  # type: ignore[arg-type]
         except ValueError:
             if self.seed == "None":
-                seed = random.randrange(sys.maxsize)
+                seed_val = random.randrange(sys.maxsize)
             else:
                 print("Il seed non e' un numero! Ciao")
                 sys.exit(1)
-        if seed < 0:
+        if seed_val < 0:
             print("Errore: il seed non deve essere negativo!")
             sys.exit(1)
-        random.seed(seed)
+        random.seed(seed_val)
         grid = self.create_grid()
-        visited = set()
+        visited: set[tuple[int, int]] = set()
         visited.add(self.entry)
-        stack = [self.entry]
+        stack: list[tuple[int, int]] = [self.entry]
 
         while stack:
             x, y = stack[-1]
@@ -255,10 +283,11 @@ class MazeGenerator:
             else:
                 stack.pop()
         if not self.perfect:
-            chosen_ones = self.get_remaining_walls(grid, self.pattern_cells, 0.15)
+            chosen_ones = self.get_remaining_walls(grid,
+                                                   self.pattern_cells, 0.15)
             while chosen_ones:
                 x, y, d = chosen_ones[-1]
                 self.remove_wall(grid, x, y, d)
                 chosen_ones.pop()
 
-        return grid, seed
+        return grid, seed_val

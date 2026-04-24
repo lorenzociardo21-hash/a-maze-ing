@@ -1,5 +1,5 @@
 import time
-from src.parser import mazeconfig
+from src.parser import mazeconfig, can_show_pattern, pattern42
 
 
 def change_config(file: str, change_settings: str,
@@ -19,15 +19,30 @@ def change_config(file: str, change_settings: str,
                 time.sleep(1)
                 return 0
             if key.upper() == "WIDTH":
+                if can_show_pattern(width, settings.height):
+                    pattern43: set[tuple[int,
+                                         int]] = pattern42(width,
+                                                           settings.height)
+                if settings.entry in pattern43 or settings.exit in pattern43:
+                    print("Errore: Sei dentro il 42")
+                    time.sleep(1)
+                    return 0
                 if width < settings.entry[0] or width < settings.exit[0]:
-                    print("Errore: DIOCANEEEEEEEEE")
+                    print("Errore: Coglione")
                     time.sleep(1)
-                    return 1
+                    return 0
             if key.upper() == "HEIGHT":
-                if width < settings.entry[1] or width < settings.exit[1]:
-                    print("Errore: L'altezza non può essere più piccola dell'entrata o dell'uscita")
+                if can_show_pattern(settings.width, width):
+                    pattern43 = pattern42(settings.width, width)
+                if settings.entry in pattern43 or settings.exit in pattern43:
+                    print("Errore: Sei dentro il 42")
                     time.sleep(1)
-                    return 1
+                    return 0
+                if width < settings.entry[1] or width < settings.exit[1]:
+                    print("Errore: L'altezza non può essere più \
+piccola dell'entrata o dell'uscita")
+                    time.sleep(1)
+                    return 0
 
         if key.upper() == "ENTRY" or key.upper() == "EXIT":
             parts: list[str] = value.split(",")
@@ -42,12 +57,14 @@ def change_config(file: str, change_settings: str,
                 time.sleep(1)
                 return 0
             if entry_coord in settings.pattern_cells:
-                print("Errore: L'entrata o l'uscita cadono dentro il pattern 42!")
+                print("Errore: L'entrata o l'uscita cadono dentro \
+il pattern 42!")
                 time.sleep(1)
                 return 0
         if key.upper() == "PERFECT":
             if value.capitalize() not in ["True", "False"]:
-                print("Errore: ammessi solo True o False per l'impostazione Perfect!")
+                print("Errore: ammessi solo True o False per \
+l'impostazione Perfect!")
                 time.sleep(1)
                 return 0
 
@@ -55,8 +72,8 @@ def change_config(file: str, change_settings: str,
             if value.capitalize() == "None":
                 pass
             else:
-                values: int = int(value)
-                if values < 0:
+                values_int: int = int(value)
+                if values_int < 0:
                     print("Errore: il seed è negativo")
                     time.sleep(1)
                     return 0

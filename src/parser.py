@@ -1,4 +1,5 @@
 import sys
+import time
 
 
 PATTERN_42 = [
@@ -51,9 +52,9 @@ class mazeconfig:
         self.entry: tuple[int, int] = (-1, -1)
         self.exit: tuple[int, int] = (-1, -1)
         self.output_file: str = ""
-        self.perfect = False
-        self.seed = None
-        self.pattern_cells = set()
+        self.perfect: bool = False
+        self.seed: str | None = None
+        self.pattern_cells: set[tuple[int, int]] = set()
 
         try:
             self.width = int(dati_estratti["WIDTH"])
@@ -67,8 +68,14 @@ class mazeconfig:
             self.seed = dati_estratti["SEED"].capitalize()
             if can_show_pattern(self.width, self.height):
                 self.pattern_cells = pattern42(self.width, self.height)
-            if self.entry in self.pattern_cells or self.exit in self.pattern_cells:
-                print("Errore: L'entrata o l'uscita cadono dentro il pattern 42!")
+            else:
+                print("\033[2J\033[H\033[3J", end="")
+                print("Il 42 non c'entra, coglione")
+                time.sleep(2.5)
+            if ((self.entry in self.pattern_cells
+                 or self.exit in self.pattern_cells)):
+                print("Errore: L'entrata o l'uscita cadono \
+dentro il pattern 42!")
                 sys.exit(1)
             if self.entry[0] < 0 or self.entry[0] > self.width or \
                self.entry[1] < 0 or self.entry[1] > self.height:

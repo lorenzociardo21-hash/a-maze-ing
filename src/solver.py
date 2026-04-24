@@ -1,9 +1,18 @@
 from maze_gen.generator import MazeGenerator, DIRECTIONS
+from typing import TypedDict
+
+
+class DirectionInfo(TypedDict):
+    num: int
+    opposite: str
+    dx: int
+    dy: int
 
 
 def get_neighbours(grid: list[list[int]], x: int, y: int,
-                   visited: set) -> list[tuple[int, int, str]]:
-    neighbours = []
+                   visited: set[tuple[int,
+                                      int]]) -> list[tuple[int, int, str]]:
+    neighbours: list[tuple[int, int, str]] = []
     for direction, values in DIRECTIONS.items():
         if not grid[y][x] & values["num"]:
             nx, ny = x + values["dx"], y + values["dy"]
@@ -18,10 +27,11 @@ def distance(x1: int, y1: int, exit: tuple[int, int]) -> float:
 
 
 def find_dir(grid: list[list[int]], x: int, y: int, exit: tuple[int, int],
-             visited: set) -> tuple[int, int, str]:
-    min_dist: int = 2**32
+             visited: set[tuple[int,
+                                int]]) -> tuple[float, int, int, str | None]:
+    min_dist: float = float('inf')
     min_x, min_y = x, y
-    direction = None
+    direction: str | None = None
     for direc, values in DIRECTIONS.items():
         if not grid[y][x] & values["num"]:
             dx, dy = x + values["dx"], y + values["dy"]
@@ -33,7 +43,8 @@ def find_dir(grid: list[list[int]], x: int, y: int, exit: tuple[int, int],
 
 
 def check_stack(grid: list[list[int]],
-                stack: list[tuple[int, int, str]]) -> None:
+                stack: list[tuple[int, int,
+                                  str]]) -> list[tuple[int, int, str]]:
     changed = True
     while changed:
         changed = False
@@ -56,7 +67,7 @@ def check_stack(grid: list[list[int]],
 def check_distance(grid: list[list[int]],
                    neighbours: list[tuple[int, int, str]],
                    exit: tuple[int, int],
-                   visited: set) -> tuple[int, int, str]:
+                   visited: set[tuple[int, int]]) -> tuple[int, int, str]:
     min_x, min_y, direction_min = neighbours[0]
     min_ndist, _, _, _ = find_dir(grid, min_x, min_y, exit,
                                   visited | {(min_x, min_y)})
@@ -74,39 +85,50 @@ def check_distance(grid: list[list[int]],
 
 
 def maze_res_astar(maze: MazeGenerator,
-                   grid: list[list[int]]) -> list[tuple[int, int, str]]:
+                   grid: list[list[int]]) -> list[tuple[int, int, str | None]]:
     start = maze.entry
     exit = maze.exit
-    stack = [(distance(*start, exit), 0, start[0], start[1])]
-    came_from = {start: None}
-    steps_made = {start: 0}
+    stack: list[tuple[float, int, int, int]] = [
+        (distance(*start, exit), 0, start[0], start[1])
+    ]
+    came_from: dict[tuple[int,
+                          int], tuple[tuple[int,
+                                            int], str] | None] = {start: None}
+    steps_made: dict[tuple[int, int], int] = {start: 0}
     while stack:
         _, steps, x, y = stack.pop()
         if (x, y) == exit:
-            path = []
+            path: list[tuple[int, int, str | None]] = []
             current = (x, y)
             while came_from[current] is not None:
-                prev, direction = came_from[current]
+                e: tuple[
+                         tuple
+                         [int,
+                          int],
+                         str] = came_from[current]  # type: ignore[assignment]
+                prev, direction = e
                 path.append((prev[0], prev[1], direction))
                 current = prev
             path.reverse()
             path.append((exit[0], exit[1], None))
             return path
-        for nx, ny, direction in get_neighbours(grid, x, y, came_from):
+        for nx, ny, direction in get_neighbours(grid, x, y,
+                                                set(came_from.keys())):
             new_step = steps + 1
             if (nx, ny) not in steps_made or new_step < steps_made[(nx, ny)]:
                 steps_made[(nx, ny)] = new_step
                 a_score = new_step + distance(nx, ny, exit)
                 stack.append((a_score, new_step, nx, ny))
-                stack = sorted(stack, key=lambda x: x[0], reverse=True)
+                stack = sorted(stack, key=lambda item: item[0], reverse=True)
                 came_from[(nx, ny)] = ((x, y), direction)
     return []
 
 
 def maze_res_mix_algo(maze: MazeGenerator,
-                      grid: list[list[int]]) -> list[tuple[int, int, str]]:
-    visited = set()
-    stack = []
+                      grid: list[list[int]]) -> list[tuple[int,
+                                                           int, str | None]]:
+    visited: set[tuple[int, int]] = set()
+    stack: list[tuple[int, int, str]] = []
     current_x, current_y = maze.entry
     visited.add((current_x, current_y))
 
@@ -124,7 +146,35 @@ def maze_res_mix_algo(maze: MazeGenerator,
                 return []
             current_x, current_y, _ = stack.pop()
 
-    stack.append((maze.exit[0], maze.exit[1], None))
-    stack = check_stack(grid, stack)
+    result: list[tuple[int, int, str | None]] = [(x, y, d) for x,
+                                                 y, d in stack]
+    result.append((maze.exit[0], maze.exit[1], None))
+    result = check_stack_none(grid, result)
 
+    return result
+
+
+def check_stack_none(grid: list[list[int]],
+                     stack: list[tuple[int,
+                                       int,
+                                       str | None]]) -> list[tuple[int,
+                                                                   int,
+                                                                   str |
+                                                                   None]]:
+    changed = True
+    while changed:
+        changed = False
+        pos_index = {(x, y): i for i, (x, y, _) in enumerate(stack)}
+        for i, (x, y, _) in enumerate(stack):
+            for direc, val in DIRECTIONS.items():
+                dx, dy = x + val["dx"], y + val["dy"]
+                if (dx, dy) in pos_index:
+                    j = pos_index[(dx, dy)]
+                    if j > i + 1 and not grid[y][x] & val["num"]:
+                        stack = stack[:i + 1] + stack[j:]
+                        stack[i] = (x, y, direc)
+                        changed = True
+                        break
+            if changed:
+                break
     return stack

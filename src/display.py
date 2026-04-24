@@ -129,7 +129,7 @@ def printamazing() -> None:
 
 
 def disegna_maze(griglia: list[list[int]], settings: mazeconfig,
-                 percorso: list[tuple[int, int, str]],
+                 percorso: list[tuple[int, int, str | None]],
                  risolvi: bool, colore: list[str]) -> None:
     """ Gestisce il rendering completo del labirinto."""
     percorso_coords: list[tuple[int, int]] = []
