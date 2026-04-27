@@ -8,7 +8,7 @@ ENTRY=0, 0
 #Exit coordinates (x, y)
 EXIT=14,14
 #Output filename
-OUTPUT_FILE=maze.txt
+OUTPUT_FILE=gsdfjikhg
 #Is the name perfect?
 PERFECT=False
 #Seed of generation
