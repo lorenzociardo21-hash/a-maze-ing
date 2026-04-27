@@ -69,6 +69,21 @@ class mazeconfig:
             self.output_file = dati_estratti["OUTPUT_FILE"]
             self.perfect = dati_estratti["PERFECT"] == "True"
             self.seed = dati_estratti["SEED"].capitalize()
+            if self.entry[0] < 0 or self.entry[0] >= self.width or \
+               self.entry[1] < 0 or self.entry[1] >= self.height:
+                print("Errore: L'entrata è fuori dal labirinto!")
+                sys.exit(1)
+            if self.exit[0] < 0 or self.exit[0] >= self.width or \
+               self.exit[1] < 0 or self.exit[1] >= self.height:
+                print("Errore: L'uscita è fuori dal labirinto!")
+                sys.exit(1)
+            if self.entry == self.exit:
+                print("Errore: Entrata e uscita non possono essere \
+nello stesso posto!")
+            if self.width <= 0 or self.height <= 0:
+                print("Errore: Larghezza e altezza devono essere \
+numeri positivi!")
+                sys.exit(1)
             if can_show_pattern(self.width, self.height):
                 self.pattern_cells = pattern42(self.width, self.height)
             else:
@@ -80,22 +95,6 @@ class mazeconfig:
                 print("Errore: L'entrata o l'uscita cadono \
 dentro il pattern 42!")
                 sys.exit(1)
-            if self.entry[0] < 0 or self.entry[0] > self.width or \
-               self.entry[1] < 0 or self.entry[1] > self.height:
-                print("Errore: L'entrata è fuori dal labirinto!")
-                sys.exit(1)
-            if self.exit[0] < 0 or self.exit[0] > self.width or \
-               self.exit[1] < 0 or self.exit[1] > self.height:
-                print("Errore: L'uscita è fuori dal labirinto!")
-                sys.exit(1)
-            if self.entry == self.exit:
-                print("Errore: Entrata e uscita non possono essere \
-nello stesso posto!")
-            if self.width <= 0 or self.height <= 0:
-                print("Errore: Larghezza e altezza devono essere \
-numeri positivi!")
-                sys.exit(1)
-
         except KeyError as e:
             print(f"Errore: Manca la chiave obbligatoria {e}")
             sys.exit(1)

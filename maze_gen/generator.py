@@ -32,12 +32,12 @@ class MazeGenerator:
 
     def create_grid(self) -> list[list[int]]:
         '''ritorna una griglia piena di 15, quindi tutte mura'''
-        return [[15 for _ in range(self.width + 1)]
-                for _ in range(self.height + 1)]
+        return [[15 for _ in range(self.width)]
+                for _ in range(self.height)]
 
     def check_bounds(self, x: int, y: int) -> bool:
         """Verifica che la cella sia dentro i limiti."""
-        return 0 <= x <= self.width and 0 <= y <= self.height
+        return 0 <= x < self.width and 0 <= y < self.height
 
     def remove_wall(self, grid: list[list[int]],
                     x: int,

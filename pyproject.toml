@@ -1,5 +1,5 @@
 [project]
-name = "a-maze-ing"
+name = "maze-gen"
 version = "0.1.0"
 description = "Project to create random generation of a maze and use algorithm to resolve it"
 authors = [

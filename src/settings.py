@@ -27,7 +27,7 @@ def change_config(file: str, change_settings: str,
                     print("Errore: Sei dentro il 42")
                     time.sleep(1)
                     return 0
-                if width < settings.entry[0] or width < settings.exit[0]:
+                if width <= settings.entry[0] or width <= settings.exit[0]:
                     print("Errore: Coglione")
                     time.sleep(1)
                     return 0
@@ -38,7 +38,7 @@ def change_config(file: str, change_settings: str,
                     print("Errore: Sei dentro il 42")
                     time.sleep(1)
                     return 0
-                if width < settings.entry[1] or width < settings.exit[1]:
+                if width <= settings.entry[1] or width <= settings.exit[1]:
                     print("Errore: L'altezza non può essere più \
 piccola dell'entrata o dell'uscita")
                     time.sleep(1)
@@ -47,8 +47,8 @@ piccola dell'entrata o dell'uscita")
         if key.upper() == "ENTRY" or key.upper() == "EXIT":
             parts: list[str] = value.split(",")
             entry_coord: tuple[int, int] = (int(parts[0]), int(parts[1]))
-            if ((entry_coord[0] < 0 or entry_coord[0] > settings.width or
-                 entry_coord[1] < 0 or entry_coord[1] > settings.height)):
+            if ((entry_coord[0] < 0 or entry_coord[0] >= settings.width or
+                 entry_coord[1] < 0 or entry_coord[1] >= settings.height)):
                 print("Errore: L'entrata è fuori dal labirinto!")
                 time.sleep(1)
                 return 0
