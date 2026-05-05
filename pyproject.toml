@@ -1,0 +1,32 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "mazegen"
+version = "0.1.0"
+description = "A reusable maze generation library implementing DFS, Prim's and Kruskal's algorithms."
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+authors = [
+    { name = "lciardo" },
+    { name = "lgreco" },
+]
+keywords = ["maze", "generator", "algorithm", "graph"]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Topic :: Games/Entertainment :: Puzzle Games",
+]
+
+[project.urls]
+Homepage = "https://github.com/lciardo/a-maze-ing"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["maze_gen*"]

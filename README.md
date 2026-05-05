@@ -226,44 +226,62 @@ If the maze is too small to fit the pattern, a message is printed and the patter
 
 ## Reusable Module: `maze_gen`
 
-The `MazeGenerator` class in `maze_gen/generator.py` is designed to be used independently of the main application. It is packaged as a pip-installable module.
+The `MazeGenerator` class in `maze_gen/generator.py` is designed to be used independently of the main application. It is distributed as a standard pip-installable package in both `.whl` and `.tar.gz` format.
+
+### Available distribution files
+
+| File | Format | Use when |
+|------|--------|----------|
+| `mazegen-0.1.0-py3-none-any.whl` | Wheel (binary-neutral) | Standard install — fastest |
+| `mazegen-0.1.0.tar.gz` | Source distribution | Building from source / auditing code |
 
 ### Installation
 
+**From the pre-built wheel (recommended):**
+
 ```bash
 pip install mazegen-0.1.0-py3-none-any.whl
-# or from source:
-pip install .
+```
+
+**From the source archive:**
+
+```bash
+pip install mazegen-0.1.0.tar.gz
 ```
 
 ### Basic Usage
 
+The `MazeGenerator` class is instantiated directly with keyword arguments — no dependency on the main application's `src.parser` module:
+
 ```python
 from maze_gen.generator import MazeGenerator
-from src.parser import mazeconfig
 
-# Build a minimal config dictionary
-data = {
-    "WIDTH": "20",
-    "HEIGHT": "15",
-    "ENTRY": "0,0",
-    "EXIT": "19,14",
-    "OUTPUT_FILE": "out.txt",
-    "PERFECT": "True",
-    "SEED": "None",
-}
-settings = mazeconfig(data)
-gen = MazeGenerator(settings)
+gen = MazeGenerator(
+    width=20,
+    height=15,
+    entry=(0, 0),
+    exit=(19, 14),
+    perfect=True,
+    seed="None",
+    pattern_cells=set(),
+)
 
-# Generate using any of the three algorithms
-grid, seed = gen.generate_maze_kruskal()
-# grid, seed = gen.generate_maze_prims()
-# grid, seed = gen.generate_maze_dfs()
+grid, seed_used = gen.generate_maze_kruskal()
 
-# grid is a list[list[int]] where each int encodes walls as bitflags
-# seed is the integer seed that was used (useful for reproducibility)
-print(f"Generated with seed: {seed}")
-print(f"Grid dimensions: {len(grid)} rows x {len(grid[0])} cols")
+print(f"Generated with seed: {seed_used}")
+print(f"Dimensions: {len(grid)} rows × {len(grid[0])} cols")
+print(grid)
+```
+
+**Reproducible generation** — pass the seed you got back as a string:
+
+```python
+grid1, seed = gen.generate_maze_kruskal()
+
+gen2 = MazeGenerator(width=20, height=15, entry=(0,0), exit=(19,14),
+                     perfect=True, seed=str(seed))
+grid2, _ = gen2.generate_maze_kruskal()
+assert grid1 == grid2  # identical maze
 ```
 
 ### Custom Parameters
