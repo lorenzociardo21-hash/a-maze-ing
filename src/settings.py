@@ -23,10 +23,11 @@ def change_config(file: str, change_settings: str,
                     pattern43: set[tuple[int,
                                          int]] = pattern42(width,
                                                            settings.height)
-                if settings.entry in pattern43 or settings.exit in pattern43:
-                    print("Errore: Sei dentro il 42")
-                    time.sleep(1)
-                    return 0
+                    if ((settings.entry in pattern43 or
+                         settings.exit in pattern43)):
+                        print("Errore: Sei dentro il 42")
+                        time.sleep(1)
+                        return 0
                 if width <= settings.entry[0] or width <= settings.exit[0]:
                     print("Errore: Coglione")
                     time.sleep(1)
@@ -34,10 +35,11 @@ def change_config(file: str, change_settings: str,
             if key.upper() == "HEIGHT":
                 if can_show_pattern(settings.width, width):
                     pattern43 = pattern42(settings.width, width)
-                if settings.entry in pattern43 or settings.exit in pattern43:
-                    print("Errore: Sei dentro il 42")
-                    time.sleep(1)
-                    return 0
+                    if ((settings.entry in pattern43 or
+                         settings.exit in pattern43)):
+                        print("Errore: Sei dentro il 42")
+                        time.sleep(1)
+                        return 0
                 if width <= settings.entry[1] or width <= settings.exit[1]:
                     print("Errore: L'altezza non può essere più \
 piccola dell'entrata o dell'uscita")
@@ -62,7 +64,8 @@ il pattern 42!")
                 time.sleep(1)
                 return 0
         if key.upper() == "PERFECT":
-            if value.capitalize() not in ["True", "False"]:
+            value = value.capitalize()
+            if value not in ["True", "False"]:
                 print("Errore: ammessi solo True o False per \
 l'impostazione Perfect!")
                 time.sleep(1)

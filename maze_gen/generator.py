@@ -1,6 +1,5 @@
 import sys
 import random
-from src.parser import mazeconfig
 from typing import TypedDict
 
 
@@ -21,14 +20,17 @@ DIRECTIONS: dict[str, DirectionInfo] = {
 
 class MazeGenerator:
     """Gestisce la generazione della struttura del labirinto."""
-    def __init__(self, maze: mazeconfig) -> None:
-        self.width: int = maze.width
-        self.height: int = maze.height
-        self.entry: tuple[int, int] = maze.entry
-        self.exit: tuple[int, int] = maze.exit
-        self.perfect: bool = maze.perfect
-        self.seed: str | None = maze.seed
-        self.pattern_cells: set[tuple[int, int]] = maze.pattern_cells
+    def __init__(self, width: int, height: int,
+                 entry: tuple[int, int], exit: tuple[int, int],
+                 perfect: bool, seed: str | None,
+                 pattern_cells: set[tuple[int, int]] = set()) -> None:
+        self.width: int = width
+        self.height: int = height
+        self.entry: tuple[int, int] = entry
+        self.exit: tuple[int, int] = exit
+        self.perfect: bool = perfect
+        self.seed: str | None = seed
+        self.pattern_cells: set[tuple[int, int]] = pattern_cells
 
     def create_grid(self) -> list[list[int]]:
         '''ritorna una griglia piena di 15, quindi tutte mura'''
